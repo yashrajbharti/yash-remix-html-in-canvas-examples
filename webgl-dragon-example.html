@@ -75,6 +75,18 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.8.1/gl-matrix-min.js"></script>
 
 <script>
+  onload = () => {
+    const canvas = document.querySelector('#gl-canvas');
+
+    const observer = new ResizeObserver(([entry]) => {
+      canvas.width = entry.devicePixelContentBoxSize[0].inlineSize;
+      canvas.height = entry.devicePixelContentBoxSize[0].blockSize;
+
+    });
+
+    observer.observe(canvas, { box: 'device-pixel-content-box' });
+  }
+
   const canvas = document.getElementById('gl-canvas');
   const gl = canvas.getContext('webgl2');
 

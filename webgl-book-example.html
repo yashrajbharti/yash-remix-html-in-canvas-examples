@@ -1,0 +1,380 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>WebGL 3D Book Experience</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: #111; color: white; font-family: sans-serif; touch-action: none; }
+        canvas { display: block; width: 100vw; height: 100vh; }
+        #ui { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.7); padding: 15px; border-radius: 8px; pointer-events: none; border: 1px solid #555; }
+        h1 { margin: 0 0 5px 0; font-size: 18px; color: #aaa; }
+    </style>
+</head>
+<body>
+    <div id="ui">
+        <h1>WebGL Book</h1>
+        Drag to turn pages, or use Left/Right Arrow keys.
+    </div>
+    <canvas id="gl-canvas"></canvas>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.8.1/gl-matrix-min.js"></script>
+    <script>
+      const PAGE_WIDTH = 2.0;
+      const PAGE_HEIGHT = 3.0;
+      
+      const canvas = document.getElementById('gl-canvas');
+      const gl = canvas.getContext('webgl2', { antialias: true });
+      if (!gl) { alert('WebGL2 not supported'); throw new Error('WebGL2 not supported'); }
+
+      window.addEventListener('resize', () => {
+          canvas.width = window.innerWidth;
+          canvas.height = window.innerHeight;
+          gl.viewport(0, 0, canvas.width, canvas.height);
+      });
+      window.dispatchEvent(new Event('resize')); 
+
+      function createPlane(width, height, segX, segY) {
+          const positions = [], normals = [], uvs = [], indices = [];
+          for (let y = 0; y <= segY; y++) {
+              for (let x = 0; x <= segX; x++) {
+                  const u = x / segX;
+                  const v = y / segY;
+                  positions.push(u * width, (v - 0.5) * height, 0);
+                  normals.push(0, 0, 1);
+                  uvs.push(u, v);
+              }
+          }
+          for (let y = 0; y < segY; y++) {
+              for (let x = 0; x < segX; x++) {
+                  const p1 = y * (segX + 1) + x;
+                  const p2 = p1 + 1;
+                  const p3 = (y + 1) * (segX + 1) + x;
+                  const p4 = p3 + 1;
+                  indices.push(p1, p2, p3);
+                  indices.push(p2, p4, p3);
+              }
+          }
+          return {
+              positions: new Float32Array(positions),
+              normals: new Float32Array(normals),
+              uvs: new Float32Array(uvs),
+              indices: new Uint16Array(indices)
+          };
+      }
+
+      function generatePageTexture(gl, pageNum, r, g, b, isCover=false) {
+          const cvs = document.createElement('canvas');
+          cvs.width = 1024; cvs.height = 1024;
+          const ctx = cvs.getContext('2d');
+
+          ctx.fillStyle = `rgb(${r},${g},${b})`;
+          ctx.fillRect(0, 0, 1024, 1024);
+
+          ctx.strokeStyle = isCover ? '#fff' : '#000';
+          ctx.lineWidth = 15;
+          ctx.strokeRect(50, 50, 924, 924);
+
+          ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          ctx.fillStyle = isCover ? '#fff' : '#000';
+          if (isCover) {
+              ctx.font = 'bold 80px sans-serif'; ctx.fillText('WebGL Book', 512, 400);
+              ctx.font = '40px sans-serif'; ctx.fillText(pageNum, 512, 500);
+          } else {
+              ctx.font = 'bold 100px serif'; ctx.fillText('PAGE ' + pageNum, 512, 200);
+              ctx.font = '35px serif';
+              let lines = ["Lorem ipsum dolor sit amet,", "consectetur adipiscing elit.", "Sed do eiusmod tempor incididunt", "ut labore et dolore magna aliqua.", "Ut enim ad minim veniam, quis", "nostrud exercitation ullamco laboris", "nisi ut aliquip ex ea commodo", "consequat. Duis aute irure dolor", "in reprehenderit in voluptate", "velit esse cillum dolore eu", "fugiat nulla pariatur."];
+              for (let i = 0; i < lines.length; i++) {
+                  ctx.fillText(lines[i], 512, 350 + i * 50);
+              }
+              ctx.fillText(pageNum.toString(), 512, 900);
+          }
+          
+          const paddingText = "The 3D book experience uses procedural textures";
+          ctx.font = '20px sans-serif';
+          ctx.fillText(paddingText, 512, 950);
+
+          const tex = gl.createTexture();
+          gl.bindTexture(gl.TEXTURE_2D, tex);
+          gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+          gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, cvs);
+          gl.generateMipmap(gl.TEXTURE_2D);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+          return tex;
+      }
+
+      const vsSource = `#version 300 es
+      layout(location=0) in vec3 aPosition;
+      layout(location=1) in vec3 aNormal;
+      layout(location=2) in vec2 aTexCoord;
+
+      uniform mat4 uProjection;
+      uniform mat4 uView;
+      uniform mat4 uModel;
+
+      uniform float uTurnProgress;
+      uniform float uPageWidth;
+      uniform float uIsFront; 
+
+      out vec2 vTexCoord;
+      out vec3 vNormal;
+      out vec3 vWorldPos;
+
+      void main() {
+          float t = uTurnProgress;
+          float theta = t * 3.14159265;
+          vec3 pos = aPosition;
+
+          float normalizedDist = pos.x / uPageWidth;
+          
+          // Pages bow backwards when peeled (air resistance/tension)
+          float sagAmount = -sin(theta) * uPageWidth * 0.15;
+          float sagProfile = pow(normalizedDist, 1.5); 
+          pos.z += sagAmount * sagProfile;
+
+          // Rotate around spine
+          float xRot = pos.x * cos(theta) - pos.z * sin(theta);
+          float zRot = pos.x * sin(theta) + pos.z * cos(theta);
+          pos.x = xRot;
+          pos.z = zRot;
+
+          vec4 worldPos = uModel * vec4(pos, 1.0);
+          gl_Position = uProjection * uView * worldPos;
+
+          // Approximate normals for lighting
+          vec3 n = aNormal;
+          if (uIsFront == 0.0) { n.z = -1.0; }
+          float nx = n.x * cos(theta) - n.z * sin(theta);
+          float nz = n.x * sin(theta) + n.z * cos(theta);
+          vNormal = mat3(uModel) * vec3(nx, n.y, nz);
+          
+          vWorldPos = worldPos.xyz;
+          vTexCoord = aTexCoord;
+          if (uIsFront == 0.0) { vTexCoord.x = 1.0 - vTexCoord.x; }
+      }`;
+
+      const fsSource = `#version 300 es
+      precision highp float;
+
+      in vec2 vTexCoord;
+      in vec3 vNormal;
+      in vec3 vWorldPos;
+
+      uniform sampler2D uSampler;
+      uniform float uIsFront;
+      
+      out vec4 fragColor;
+
+      void main() {
+          vec4 texColor = texture(uSampler, vTexCoord);
+          vec3 n = normalize(vNormal);
+          vec3 lightDir = normalize(vec3(0.4, 0.8, 0.8)); // angled lit
+          
+          // We use max dot with abs to loosely handle back lit situations, but backfaces are culled anyway
+          float diff = max(dot(n, lightDir), 0.3); 
+          vec3 color = texColor.rgb * diff;
+          
+          // Spine shadow gradient
+          float distToSpine = vTexCoord.x;
+          if (uIsFront == 0.0) { distToSpine = 1.0 - vTexCoord.x; }
+          float shadow = mix(0.4, 1.0, smoothstep(0.0, 0.2, distToSpine));
+          color *= shadow;
+
+          fragColor = vec4(color, texColor.a);
+      }`;
+
+      function createShader(gl, type, source) {
+          const shader = gl.createShader(type);
+          gl.shaderSource(shader, source);
+          gl.compileShader(shader);
+          if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+              console.error(gl.getShaderInfoLog(shader));
+              gl.deleteShader(shader);
+              return null;
+          }
+          return shader;
+      }
+
+      const program = gl.createProgram();
+      gl.attachShader(program, createShader(gl, gl.VERTEX_SHADER, vsSource));
+      gl.attachShader(program, createShader(gl, gl.FRAGMENT_SHADER, fsSource));
+      gl.linkProgram(program);
+
+      const uniforms = {
+          uProjection: gl.getUniformLocation(program, 'uProjection'),
+          uView: gl.getUniformLocation(program, 'uView'),
+          uModel: gl.getUniformLocation(program, 'uModel'),
+          uTurnProgress: gl.getUniformLocation(program, 'uTurnProgress'),
+          uPageWidth: gl.getUniformLocation(program, 'uPageWidth'),
+          uIsFront: gl.getUniformLocation(program, 'uIsFront'),
+          uSampler: gl.getUniformLocation(program, 'uSampler')
+      };
+
+      const plane = createPlane(PAGE_WIDTH, PAGE_HEIGHT, 50, 50);
+      const vao = gl.createVertexArray();
+      gl.bindVertexArray(vao);
+
+      const posBuffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer);
+      gl.bufferData(gl.ARRAY_BUFFER, plane.positions, gl.STATIC_DRAW);
+      gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
+
+      const normBuffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, normBuffer);
+      gl.bufferData(gl.ARRAY_BUFFER, plane.normals, gl.STATIC_DRAW);
+      gl.enableVertexAttribArray(1); gl.vertexAttribPointer(1, 3, gl.FLOAT, false, 0, 0);
+
+      const uvBuffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, uvBuffer);
+      gl.bufferData(gl.ARRAY_BUFFER, plane.uvs, gl.STATIC_DRAW);
+      gl.enableVertexAttribArray(2); gl.vertexAttribPointer(2, 2, gl.FLOAT, false, 0, 0);
+
+      const idxBuffer = gl.createBuffer();
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, idxBuffer);
+      gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, plane.indices, gl.STATIC_DRAW);
+
+      const numTotalPages = 6;
+      const pages = [];
+      const colors = [
+          [40,40,50], [240,230,210], [230,240,220], [210,230,240], [240,220,230], [50,30,30]
+      ];
+      for (let i = 0; i < numTotalPages/2; i++) {
+          let frontTex, backTex;
+          if (i === 0) {
+              frontTex = generatePageTexture(gl, "Cover", colors[0][0], colors[0][1], colors[0][2], true);
+          } else {
+              frontTex = generatePageTexture(gl, i * 2 - 1, colors[i*2-1][0], colors[i*2-1][1], colors[i*2-1][2], false);
+          }
+          if (i === Math.floor(numTotalPages/2) - 1) {
+              backTex = generatePageTexture(gl, "Back Cover", colors[5][0], colors[5][1], colors[5][2], true);
+          } else {
+              backTex = generatePageTexture(gl, i * 2, colors[i*2][0], colors[i*2][1], colors[i*2][2], false);
+          }
+          pages.push({
+              frontTex, backTex,
+              progress: 0,
+              targetProgress: 0
+          });
+      }
+
+      let isDragging = false;
+      let dragStartX = 0;
+      let dragStartProgress = 0;
+      let turningPage = null;
+
+      function getTurnablePage(direction) {
+          if (direction > 0) {
+              return pages.find(p => p.targetProgress === 0.0) || null;
+          } else {
+              const reversed = [...pages].reverse();
+              return reversed.find(p => p.targetProgress === 1.0) || null;
+          }
+      }
+
+      window.addEventListener('mousedown', e => {
+          const x = e.clientX / window.innerWidth;
+          turningPage = getTurnablePage(x > 0.5 ? 1 : -1);
+          if (turningPage) {
+              isDragging = true;
+              dragStartX = x;
+              dragStartProgress = turningPage.progress;
+              turningPage.targetProgress = -1;
+          }
+      });
+
+      window.addEventListener('mousemove', e => {
+          if (!isDragging || !turningPage) return;
+          const x = e.clientX / window.innerWidth;
+          const dx = x - dragStartX;
+          let newProgress = dragStartProgress - dx * 2.0; 
+          turningPage.progress = Math.max(0, Math.min(1, newProgress));
+      });
+
+      window.addEventListener('mouseup', e => {
+          if (!isDragging || !turningPage) return;
+          isDragging = false;
+          turningPage.targetProgress = turningPage.progress > 0.5 ? 1.0 : 0.0;
+          turningPage = null;
+      });
+
+      window.addEventListener('keydown', e => {
+          if (e.key === 'ArrowRight') {
+              let p = getTurnablePage(1);
+              if (p) { p.targetProgress = 1.0; p.progress = Math.max(0.01, p.progress); }
+          }
+          if (e.key === 'ArrowLeft') {
+              let p = getTurnablePage(-1);
+              if (p) { p.targetProgress = 0.0; p.progress = Math.min(0.99, p.progress); }
+          }
+      });
+
+      let lastTime = 0;
+
+      function render(time) {
+          const dt = (time - lastTime) / 1000;
+          lastTime = time;
+
+          for (let p of pages) {
+              if (p.targetProgress !== -1 && p.progress !== p.targetProgress) {
+                  const speed = 1.0; 
+                  if (p.progress < p.targetProgress) {
+                      p.progress = Math.min(p.targetProgress, p.progress + speed * dt);
+                  } else {
+                      p.progress = Math.max(p.targetProgress, p.progress - speed * dt);
+                  }
+              }
+          }
+
+          gl.clearColor(0.1, 0.1, 0.1, 1.0);
+          gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+          gl.enable(gl.DEPTH_TEST);
+          gl.enable(gl.CULL_FACE);
+          gl.cullFace(gl.BACK);
+
+          gl.useProgram(program);
+
+          const projection = mat4.create();
+          mat4.perspective(projection, 45 * Math.PI / 180, canvas.width / canvas.height, 0.1, 100.0);
+          
+          const view = mat4.create();
+          mat4.lookAt(view, [0, 0, 7], [0, 0, 0], [0, 1, 0]);
+
+          gl.uniformMatrix4fv(uniforms.uProjection, false, projection);
+          gl.uniformMatrix4fv(uniforms.uView, false, view);
+          gl.uniform1f(uniforms.uPageWidth, PAGE_WIDTH);
+
+          gl.bindVertexArray(vao);
+          gl.activeTexture(gl.TEXTURE0);
+          gl.uniform1i(uniforms.uSampler, 0);
+
+          for (let i = 0; i < pages.length; i++) {
+              const p = pages[i];
+              const t = p.progress;
+              const zRight = -i * 0.01;
+              const zLeft = -(pages.length - 1 - i) * 0.01;
+              const zOffset = (1.0 - t) * zRight + t * zLeft;
+              
+              const model = mat4.create();
+              mat4.translate(model, model, [0, 0, zOffset]);
+              mat4.rotateX(model, model, -0.15); 
+
+              gl.uniformMatrix4fv(uniforms.uModel, false, model);
+              gl.uniform1f(uniforms.uTurnProgress, t);
+
+              // Draw Front
+              gl.uniform1f(uniforms.uIsFront, 1.0);
+              gl.bindTexture(gl.TEXTURE_2D, p.frontTex);
+              gl.drawElements(gl.TRIANGLES, plane.indices.length, gl.UNSIGNED_SHORT, 0);
+
+              // Draw Back
+              gl.uniform1f(uniforms.uIsFront, 0.0);
+              gl.bindTexture(gl.TEXTURE_2D, p.backTex);
+              gl.drawElements(gl.TRIANGLES, plane.indices.length, gl.UNSIGNED_SHORT, 0);
+          }
+
+          requestAnimationFrame(render);
+      }
+      requestAnimationFrame(render);
+    </script>
+</body>
+</html>
