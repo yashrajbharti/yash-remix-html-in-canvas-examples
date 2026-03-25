@@ -260,7 +260,7 @@
 
   // Load Dragon
   async function loadDragon() {
-    const binResponse = await fetch('stanford_dragon_pbr/scene.bin');
+    const binResponse = await fetch('assets/stanford_dragon_pbr/scene.bin');
     const binBuffer = await binResponse.arrayBuffer();
 
     // Offsets from GLTF (reused from WebGL example)
@@ -282,7 +282,7 @@
     const uvBuffer = createBuffer(device, uvData, GPUBufferUsage.VERTEX);
 
     // Load Texture
-    const imgBitmap = await createImageBitmap(await (await fetch('stanford_dragon_pbr/textures/DefaultMaterial_baseColor.jpeg')).blob());
+    const imgBitmap = await createImageBitmap(await (await fetch('assets/stanford_dragon_pbr/textures/DefaultMaterial_baseColor.jpeg')).blob());
     const texture = device.createTexture({
       size: [imgBitmap.width, imgBitmap.height, 1],
       format: 'rgba8unorm',

@@ -258,7 +258,7 @@
   // BufferView 3 offset: 585328, length: 176672
 
   async function loadDragon() {
-    const binResponse = await fetch('stanford_dragon_pbr/scene.bin');
+    const binResponse = await fetch('assets/stanford_dragon_pbr/scene.bin');
     const binBuffer = await binResponse.arrayBuffer();
 
     const vao = gl.createVertexArray();
@@ -326,7 +326,7 @@
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
       gl.generateMipmap(gl.TEXTURE_2D);
     };
-    image.src = 'stanford_dragon_pbr/textures/DefaultMaterial_baseColor.jpeg';
+    image.src = 'assets/stanford_dragon_pbr/textures/DefaultMaterial_baseColor.jpeg';
 
     return { vao, count: 57996, texture };
   }

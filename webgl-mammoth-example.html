@@ -221,7 +221,7 @@
   const uSampler = gl.getUniformLocation(program, 'uSampler');
 
   async function loadMammoth() {
-    const binResponse = await fetch('woolly-mammoth-100k-4096-gltf_std/woolly-mammoth-100k-4096.bin');
+    const binResponse = await fetch('assets/woolly-mammoth-100k-4096-gltf_std/woolly-mammoth-100k-4096.bin');
     const binBuffer = await binResponse.arrayBuffer();
 
     const vao = gl.createVertexArray();
