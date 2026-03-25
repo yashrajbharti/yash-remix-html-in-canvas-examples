@@ -40,8 +40,9 @@
 }
 
 @media (prefers-color-scheme: dark) {
-    :root,
-    :host {
+    /* Dont want dark them for an example? just use light-only class */
+    :root:not(:has(.light-only)),
+    :host:not(:has(.light-only)) {
         --md-sys-color-background: #12131a;
         --md-sys-color-on-background: #e3e1ec;
         --md-sys-color-surface: #12131a;
