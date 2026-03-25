@@ -251,6 +251,15 @@ export function setupBookRendering(canvas, numTotalPages = 6) {
             updatePageTextureFromDOM(gl, p.backTex, p.backId);
         }
 
+        let topRightIndex = -1;
+        for (let i = 0; i < pages.length; i++) {
+            if (pages[i].progress <= 0.001) { topRightIndex = i; break; }
+        }
+        let topLeftIndex = -1;
+        for (let i = pages.length - 1; i >= 0; i--) {
+            if (pages[i].progress >= 0.999) { topLeftIndex = i; break; }
+        }
+
         gl.clearColor(0.1, 0.1, 0.1, 0.0); // transparent background
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         gl.enable(gl.DEPTH_TEST);
@@ -303,10 +312,12 @@ export function setupBookRendering(canvas, numTotalPages = 6) {
                 const flatModelFront = mat4.create();
                 mat4.translate(flatModelFront, flatModelFront, [0, 0, zOffset]);
                 mat4.rotateX(flatModelFront, flatModelFront, -0.15);
+                mat4.rotateY(flatModelFront, flatModelFront, -t * Math.PI);
 
                 const flatModelBack = mat4.create();
                 mat4.translate(flatModelBack, flatModelBack, [0, 0, zOffset]);
                 mat4.rotateX(flatModelBack, flatModelBack, -0.15);
+                mat4.rotateY(flatModelBack, flatModelBack, -t * Math.PI);
                 mat4.translate(flatModelBack, flatModelBack, [2.0, 0, 0]);
                 mat4.scale(flatModelBack, flatModelBack, [-1, 1, 1]);
 
@@ -318,11 +329,20 @@ export function setupBookRendering(canvas, numTotalPages = 6) {
                 mat4.multiply(mvpFront, projection, view);
                 mat4.multiply(mvpFront, mvpFront, flatModelFront);
 
+                const isFrontVisible = t < 0.5;
+                const turnBoost = Math.sin(t * Math.PI) * 1000;
+                const zBase = (zOffset + 1.0) * 10000 + turnBoost;
+                
+                const isTurning = t > 0.001 && t < 0.999;
+                const isTopActive = (i === topRightIndex || i === topLeftIndex || isTurning);
+
                 const frontEl = document.getElementById(p.frontId);
                 if (frontEl) {
                     const finalTransformFront = toCSSViewport.multiply(new DOMMatrix(Array.from(mvpFront))).multiply(toGLModel);
                     const tFront = canvas.getElementTransform(frontEl, finalTransformFront);
                     if (tFront) frontEl.style.transform = tFront.toString();
+                    frontEl.style.zIndex = Math.round(zBase + (isFrontVisible ? 10 : -10));
+                    frontEl.style.pointerEvents = (isFrontVisible && isTopActive) ? 'auto' : 'none';
                 }
 
                 const mvpBack = mat4.create();
@@ -334,6 +354,8 @@ export function setupBookRendering(canvas, numTotalPages = 6) {
                     const finalTransformBack = toCSSViewport.multiply(new DOMMatrix(Array.from(mvpBack))).multiply(toGLModel);
                     const tBack = canvas.getElementTransform(backEl, finalTransformBack);
                     if (tBack) backEl.style.transform = tBack.toString();
+                    backEl.style.zIndex = Math.round(zBase + (!isFrontVisible ? 10 : -10));
+                    backEl.style.pointerEvents = (!isFrontVisible && isTopActive) ? 'auto' : 'none';
                 }
             }
         }
