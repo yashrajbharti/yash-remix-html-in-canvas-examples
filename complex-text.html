@@ -10,7 +10,7 @@
   }
 </style>
 
-<canvas id="canvas" width="638" height="318" layoutsubtree="true">
+<canvas id="canvas" width="638" height="318" layoutsubtree>
   <div id="draw_element" style="width: 550px;">
     Hello from <a href="https://github.com/WICG/html-in-canvas">html-in-canvas</a>!
     <br>I'm multi-line, <b>formatted</b>,
@@ -20,7 +20,7 @@
     <p style="writing-mode: vertical-rl;">
       这是垂直文本
     </p>
-    an inline image (<img width="150" src="wolf.jpg" alt="A wolf walking through snow in the forest">), and
+    an inline image (<img width="60" src="flower.jpg" alt="A flower blooming">), and
     <svg width="50" height="50">
       <circle cx="25" cy="25" r="20" fill="green" />
       <text x="25" y="30" font-size="15" text-anchor="middle" fill="#fff">
@@ -32,7 +32,7 @@
 
 <script>
   const ctx = document.getElementById('canvas').getContext('2d');
-  onload = () => {
+  canvas.onpaint = () => {
     const observer = new ResizeObserver(([entry]) => {
       canvas.width = entry.devicePixelContentBoxSize[0].inlineSize;
       canvas.height = entry.devicePixelContentBoxSize[0].blockSize;

@@ -24,9 +24,9 @@
     font-family: monospace;
     font-size: 14px;
     color: rgba(255, 255, 255, 0.7);
-    text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
   }
-  
+
   #draw_element {
     width: 600px;
     height: 600px;
@@ -43,7 +43,7 @@
     height: 520px;
     border-radius: 40px;
     background: linear-gradient(135deg, #1e0b36 0%, #0d0620 100%);
-    box-shadow: 0 30px 60px rgba(0,0,0,0.5), inset 0 0 0 4px rgba(255,255,255,0.05);
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5), inset 0 0 0 4px rgba(255, 255, 255, 0.05);
     overflow: hidden;
     font-family: 'Nunito', sans-serif;
     color: #fff;
@@ -82,9 +82,17 @@
   }
 
   @keyframes drift {
-    0% { transform: translate(0, 0) scale(1) rotate(0deg); }
-    50% { transform: translate(30px, -30px) scale(1.1) rotate(45deg); }
-    100% { transform: translate(-20px, 40px) scale(0.9) rotate(90deg); }
+    0% {
+      transform: translate(0, 0) scale(1) rotate(0deg);
+    }
+
+    50% {
+      transform: translate(30px, -30px) scale(1.1) rotate(45deg);
+    }
+
+    100% {
+      transform: translate(-20px, 40px) scale(0.9) rotate(90deg);
+    }
   }
 
   .glass-content {
@@ -111,7 +119,7 @@
     background: linear-gradient(to right, #ff007f, #00f0ff);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    text-shadow: 2px 2px 10px rgba(0,240,255,0.2);
+    text-shadow: 2px 2px 10px rgba(0, 240, 255, 0.2);
   }
 
   /* Controls */
@@ -132,7 +140,7 @@
     font-size: 13px;
     letter-spacing: 1px;
     text-transform: uppercase;
-    color: rgba(255,255,255,0.7);
+    color: rgba(255, 255, 255, 0.7);
   }
 
   /* Custom input range */
@@ -141,9 +149,9 @@
     width: 100%;
     height: 11px;
     border-radius: 10px;
-    background: rgba(255,255,255,0.1);
+    background: rgba(255, 255, 255, 0.1);
     outline: none;
-    box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.5);
   }
 
   .bubbly-slider::-webkit-slider-thumb {
@@ -154,15 +162,17 @@
     border-radius: 50%;
     background: #ff007f;
     cursor: pointer;
-    box-shadow: 0 0 15px #ff007f, inset 0 -3px 5px rgba(0,0,0,0.2);
+    box-shadow: 0 0 15px #ff007f, inset 0 -3px 5px rgba(0, 0, 0, 0.2);
     transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
+
   .bubbly-slider::-webkit-slider-thumb:hover {
     transform: scale(1.3);
   }
+
   .bubbly-slider.color-2::-webkit-slider-thumb {
     background: #00f0ff;
-    box-shadow: 0 0 15px #00f0ff, inset 0 -3px 5px rgba(0,0,0,0.2);
+    box-shadow: 0 0 15px #00f0ff, inset 0 -3px 5px rgba(0, 0, 0, 0.2);
   }
 
   /* Toggle */
@@ -170,16 +180,16 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: rgba(0,0,0,0.2);
+    background: rgba(0, 0, 0, 0.2);
     padding: 13.5px 18px;
     border-radius: 20px;
-    box-shadow: inset 0 2px 5px rgba(0,0,0,0.3);
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.3);
   }
 
   .toggle-label {
     font-size: 14px;
     font-weight: 700;
-    color: rgba(255,255,255,0.9);
+    color: rgba(255, 255, 255, 0.9);
   }
 
   .switch {
@@ -189,7 +199,7 @@
     height: 31px;
   }
 
-  .switch input { 
+  .switch input {
     opacity: 0;
     width: 0;
     height: 0;
@@ -202,10 +212,10 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(255,255,255,0.1);
+    background-color: rgba(255, 255, 255, 0.1);
     transition: .4s;
     border-radius: 34px;
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.4);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
   }
 
   .slider:before {
@@ -218,15 +228,15 @@
     background-color: white;
     transition: .4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
     border-radius: 50%;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
   }
 
-  input:checked + .slider {
+  input:checked+.slider {
     background-color: #00f0ff;
-    box-shadow: 0 0 15px rgba(0,240,255,0.5), inset 0 2px 4px rgba(0,0,0,0.4);
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.5), inset 0 2px 4px rgba(0, 0, 0, 0.4);
   }
 
-  input:checked + .slider:before {
+  input:checked+.slider:before {
     transform: translateX(23px);
   }
 
@@ -238,14 +248,15 @@
 
   .stat-box {
     flex: 1;
-    background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.02));
-    border: 1px solid rgba(255,255,255,0.1);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02));
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 20px;
     padding: 9px;
     text-align: center;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
     transition: transform 0.3s;
   }
+
   .stat-box:hover {
     transform: translateY(-5px);
   }
@@ -268,7 +279,7 @@
     font-size: 10px;
     text-transform: uppercase;
     font-weight: 700;
-    color: rgba(255,255,255,0.6);
+    color: rgba(255, 255, 255, 0.6);
     margin-top: 5px;
   }
 
@@ -276,11 +287,19 @@
     animation: stat-pulse 2s infinite;
     border-color: rgba(0, 240, 255, 0.4);
   }
-  
+
   @keyframes stat-pulse {
-    0% { box-shadow: 0 0 0 0 rgba(0,240,255,0.4); }
-    70% { box-shadow: 0 0 0 10px rgba(0,240,255,0); }
-    100% { box-shadow: 0 0 0 0 rgba(0,240,255,0); }
+    0% {
+      box-shadow: 0 0 0 0 rgba(0, 240, 255, 0.4);
+    }
+
+    70% {
+      box-shadow: 0 0 0 10px rgba(0, 240, 255, 0);
+    }
+
+    100% {
+      box-shadow: 0 0 0 0 rgba(0, 240, 255, 0);
+    }
   }
 
   /* Buttons */
@@ -299,35 +318,39 @@
     cursor: pointer;
     font-family: inherit;
     transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   }
 
   .btn-primary {
     background: linear-gradient(135deg, #ff007f, #8e2de2);
     color: white;
-    box-shadow: 0 10px 20px rgba(255,0,127,0.3), inset 0 2px 0 rgba(255,255,255,0.2);
+    box-shadow: 0 10px 20px rgba(255, 0, 127, 0.3), inset 0 2px 0 rgba(255, 255, 255, 0.2);
   }
+
   .btn-primary:active {
     transform: scale(0.95);
-    box-shadow: 0 5px 10px rgba(255,0,127,0.3);
+    box-shadow: 0 5px 10px rgba(255, 0, 127, 0.3);
   }
+
   .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 15px 25px rgba(255,0,127,0.4), inset 0 2px 0 rgba(255,255,255,0.3);
+    box-shadow: 0 15px 25px rgba(255, 0, 127, 0.4), inset 0 2px 0 rgba(255, 255, 255, 0.3);
   }
 
   .btn-secondary {
     background: linear-gradient(135deg, #00f0ff, #005ce6);
     color: white;
-    box-shadow: 0 10px 20px rgba(0,240,255,0.3), inset 0 2px 0 rgba(255,255,255,0.2);
+    box-shadow: 0 10px 20px rgba(0, 240, 255, 0.3), inset 0 2px 0 rgba(255, 255, 255, 0.2);
   }
+
   .btn-secondary:active {
     transform: scale(0.95);
-    box-shadow: 0 5px 10px rgba(0,240,255,0.3);
+    box-shadow: 0 5px 10px rgba(0, 240, 255, 0.3);
   }
+
   .btn-secondary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 15px 25px rgba(0,240,255,0.4), inset 0 2px 0 rgba(255,255,255,0.3);
+    box-shadow: 0 15px 25px rgba(0, 240, 255, 0.4), inset 0 2px 0 rgba(255, 255, 255, 0.3);
   }
 
   /* Emojis */
@@ -335,10 +358,10 @@
     display: flex;
     justify-content: space-around;
     padding: 9px;
-    background: rgba(0,0,0,0.3);
+    background: rgba(0, 0, 0, 0.3);
     border-radius: 30px;
     margin-top: 5px;
-    box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.5);
     position: relative;
     gap: 18px;
   }
@@ -349,6 +372,7 @@
     cursor: pointer;
     transition: transform 0.2s;
   }
+
   .emoji:hover {
     transform: scale(1.5) rotate(10deg);
   }
@@ -358,21 +382,54 @@
   }
 
   @keyframes bounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-8px); }
+
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+
+    50% {
+      transform: translateY(-8px);
+    }
   }
 
-  .emoji:nth-child(1) { animation-delay: 0.1s; }
-  .emoji:nth-child(2) { animation-delay: 0.2s; }
-  .emoji:nth-child(3) { animation-delay: 0.3s; }
-  .emoji:nth-child(4) { animation-delay: 0.4s; }
-  .emoji:nth-child(5) { animation-delay: 0.5s; }
+  .emoji:nth-child(1) {
+    animation-delay: 0.1s;
+  }
+
+  .emoji:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+
+  .emoji:nth-child(3) {
+    animation-delay: 0.3s;
+  }
+
+  .emoji:nth-child(4) {
+    animation-delay: 0.4s;
+  }
+
+  .emoji:nth-child(5) {
+    animation-delay: 0.5s;
+  }
 
   @keyframes float-up-fade {
-    0% { transform: translate(0, 0) scale(1); opacity: 1; }
-    50% { transform: translate(0, -50px) scale(1.5); opacity: 0.8; }
-    100% { transform: translate(0, -100px) scale(2); opacity: 0; }
+    0% {
+      transform: translate(0, 0) scale(1);
+      opacity: 1;
+    }
+
+    50% {
+      transform: translate(0, -50px) scale(1.5);
+      opacity: 0.8;
+    }
+
+    100% {
+      transform: translate(0, -100px) scale(2);
+      opacity: 0;
+    }
   }
+
   .exploding-emoji {
     position: absolute;
     pointer-events: none;
@@ -380,7 +437,6 @@
     animation: float-up-fade 1s ease-out forwards;
     font-size: 22px;
   }
-
 </style>
 
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
@@ -396,22 +452,22 @@
     <div class="bubbly-card" id="main-card">
       <div class="blob blob-1"></div>
       <div class="blob blob-2"></div>
-      
+
       <div class="glass-content">
         <h1 class="title">Bubbly UI ✨</h1>
-        
+
         <div class="controls-grid">
           <div class="control-group">
             <label>Master Volume</label>
             <input type="range" class="bubbly-slider" min="0" max="100" value="70">
           </div>
-          
+
           <div class="control-group">
             <label>Neon Intensity</label>
             <input type="range" id="neon-slider" class="bubbly-slider color-2" min="0" max="360" value="0">
           </div>
         </div>
-        
+
         <div class="toggle-container">
           <span class="toggle-label">Auto Sequence Mode</span>
           <label class="switch">
@@ -419,7 +475,7 @@
             <span class="slider round"></span>
           </label>
         </div>
-        
+
         <div class="stats-container">
           <div class="stat-box">
             <div class="stat-value">92%</div>
@@ -439,7 +495,7 @@
           <button class="btn btn-primary">Engage 🚀</button>
           <button class="btn btn-secondary">Chill ❄️</button>
         </div>
-        
+
         <div class="emoji-bar">
           <div class="emoji bouncing">💖</div>
           <div class="emoji bouncing">🔥</div>
@@ -455,6 +511,7 @@
 <script>
   const glMatrix = { vec3: window.vec3, mat4: window.mat4 };
   const canvas = document.getElementById('gl-canvas');
+
   const gl = canvas.getContext('webgl2');
 
   const draw_element = document.getElementById('draw_element');
@@ -539,10 +596,10 @@ void main() {
 
   // Quad (Unit size, centered at origin)
   const positions = new Float32Array([
-    -0.5,  0.5, 0.0,
-     0.5,  0.5, 0.0,
+    -0.5, 0.5, 0.0,
+    0.5, 0.5, 0.0,
     -0.5, -0.5, 0.0,
-     0.5, -0.5, 0.0,
+    0.5, -0.5, 0.0,
   ]);
 
   const texCoords = new Float32Array([
@@ -608,13 +665,13 @@ void main() {
     if (keys['ArrowDown']) camera.rotation[0] -= rotSpeed;
 
     const fwd = glMatrix.vec3.fromValues(
-      -Math.sin(camera.rotation[1]), 
-      0, 
+      -Math.sin(camera.rotation[1]),
+      0,
       -Math.cos(camera.rotation[1])
     );
     const strafe = glMatrix.vec3.fromValues(
-      Math.cos(camera.rotation[1]), 
-      0, 
+      Math.cos(camera.rotation[1]),
+      0,
       -Math.sin(camera.rotation[1])
     );
 
@@ -718,7 +775,7 @@ void main() {
       gl.bindTexture(gl.TEXTURE_2D, texture);
       gl.texElementImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, draw_element);
     }
-    
+
     gl.uniformMatrix4fv(programInfo.uniforms.modelView, false, billboardMatrix);
     gl.uniform1i(programInfo.uniforms.useTexture, 1);
     gl.activeTexture(gl.TEXTURE0);
@@ -747,11 +804,11 @@ void main() {
       const clone = document.createElement('div');
       clone.innerText = emoji.textContent.trim().split('\n')[0];
       clone.className = 'exploding-emoji';
-      
+
       const randomX = (Math.random() - 0.5) * 30;
       clone.style.left = (emoji.offsetLeft + randomX) + 'px';
       clone.style.top = emoji.offsetTop + 'px';
-      
+
       emojiBar.appendChild(clone);
       setTimeout(() => clone.remove(), 1000);
     });
