@@ -1,16 +1,16 @@
 <!doctype html>
 <meta charset="utf-8" />
 <title>WebGL Billboard - Neon Hearts</title>
-    <link rel="stylesheet" href="css/theme.css">
-    <script type="module" src="js/material-web-bundle.js"></script>
+<link rel="stylesheet" href="css/theme.css">
+<script type="module" src="js/material-web-bundle.js"></script>
 
 <style>
   body {
     margin: 0;
     overflow: hidden;
-    
-    
-    
+
+
+
   }
 
   canvas {
@@ -26,7 +26,7 @@
     pointer-events: none;
     font-size: 14px;
     color: rgba(255, 255, 255, 0.7);
-    text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
   }
 
   /* HTML-in-Canvas Renderer Bounding Box */
@@ -49,7 +49,7 @@
     /* Neon dynamic background variable */
     --hue: 280;
     background: linear-gradient(135deg, hsl(var(--hue), 80%, 30%) 0%, hsl(calc(var(--hue) + 60), 100%, 20%) 100%);
-    box-shadow: 0 30px 60px rgba(0,0,0,0.5), inset 0 0 0 2px rgba(255,255,255,0.1);
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5), inset 0 0 0 2px rgba(255, 255, 255, 0.1);
     display: flex;
     flex-direction: column;
     gap: 30px;
@@ -64,7 +64,7 @@
     border-radius: 20px;
     padding: 30px;
     border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: inset 0 2px 10px rgba(0,0,0,0.2);
+    box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.2);
     display: flex;
     flex-direction: column;
     gap: 20px;
@@ -77,7 +77,7 @@
     text-align: center;
     text-transform: uppercase;
     letter-spacing: 2px;
-    text-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    text-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
   }
 
   /* Slider Styling */
@@ -90,7 +90,7 @@
   .slider-wrapper label {
     font-size: 16px;
     font-weight: 600;
-    color: rgba(255,255,255,0.9);
+    color: rgba(255, 255, 255, 0.9);
     letter-spacing: 1px;
     text-transform: uppercase;
   }
@@ -100,9 +100,9 @@
     width: 100%;
     height: 14px;
     border-radius: 10px;
-    background: rgba(0,0,0,0.3);
+    background: rgba(0, 0, 0, 0.3);
     outline: none;
-    box-shadow: inset 0 2px 6px rgba(0,0,0,0.5);
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.5);
     position: relative;
     cursor: pointer;
   }
@@ -115,9 +115,10 @@
     border-radius: 50%;
     background: #fff;
     cursor: pointer;
-    box-shadow: 0 0 20px rgba(255,255,255,0.8), inset 0 -3px 5px rgba(0,0,0,0.2);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.8), inset 0 -3px 5px rgba(0, 0, 0, 0.2);
     transition: transform 0.1s;
   }
+
   .cool-slider::-webkit-slider-thumb:hover {
     transform: scale(1.3);
   }
@@ -125,20 +126,21 @@
   /* Secondary Inputs */
   .custom-input {
     width: 100%;
-    background: rgba(0,0,0,0.2);
-    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     padding: 15px;
     border-radius: 12px;
     color: white;
     font-size: 18px;
     font-family: inherit;
     box-sizing: border-box;
-    box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
   }
+
   .custom-input:focus {
     outline: none;
-    border-color: rgba(255,255,255,0.5);
-    background: rgba(0,0,0,0.4);
+    border-color: rgba(255, 255, 255, 0.5);
+    background: rgba(0, 0, 0, 0.4);
   }
 
   /* Emojis */
@@ -146,7 +148,7 @@
     display: flex;
     justify-content: space-around;
     padding: 20px;
-    background: rgba(0,0,0,0.2);
+    background: rgba(0, 0, 0, 0.2);
     border-radius: 20px;
     position: relative;
   }
@@ -158,15 +160,27 @@
     transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     z-index: 10;
   }
+
   .emoji:hover {
     transform: scale(1.3);
   }
 
   /* Insta-Heart Explosion Animation */
   @keyframes explode-up {
-    0% { transform: scale(1) translateY(0); opacity: 1; }
-    30% { transform: scale(1.8) translateY(-30px); opacity: 0.9; }
-    100% { transform: scale(2.5) translateY(-150px); opacity: 0; }
+    0% {
+      transform: scale(1) translateY(0);
+      opacity: 1;
+    }
+
+    30% {
+      transform: scale(1.8) translateY(-30px);
+      opacity: 0.9;
+    }
+
+    100% {
+      transform: scale(2.5) translateY(-150px);
+      opacity: 0;
+    }
   }
 
   .exploding-emoji {
@@ -175,7 +189,7 @@
     z-index: 50;
     animation: explode-up 1.2s ease-out forwards;
     font-size: 36px;
-    filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5));
+    filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.5));
   }
 </style>
 
@@ -188,7 +202,7 @@
   <div id="draw_element">
     <div class="neon-panel" id="main-panel">
       <h2>Neon Control</h2>
-      
+
       <div class="inner-container">
         <div class="slider-wrapper">
           <label>Shift Gradient Hue</label>
@@ -211,7 +225,7 @@
   </div>
 </canvas>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.8.1/gl-matrix-min.js"></script>
+<script src="js/gl-matrix.js"></script>
 <script>
   // Setup logic for UI interactions
   const glMatrix = { vec3: window.vec3, mat4: window.mat4 };
@@ -230,14 +244,14 @@
       const clone = document.createElement('div');
       clone.textContent = e.target.textContent;
       clone.className = 'exploding-emoji';
-      
+
       // Jitter start roughly near original
       const jitterX = (Math.random() - 0.5) * 20;
       clone.style.left = (e.target.offsetLeft + jitterX) + 'px';
       clone.style.top = e.target.offsetTop + 'px';
-      
+
       emojiBar.appendChild(clone);
-      
+
       // Cleanup DOM node when animation completes
       setTimeout(() => {
         clone.remove();
@@ -305,8 +319,8 @@ void main() {
     },
   };
 
-  const positions = new Float32Array([-0.5,0.5,0, 0.5,0.5,0, -0.5,-0.5,0, 0.5,-0.5,0]);
-  const texCoords = new Float32Array([0,0, 1,0, 0,1, 1,1]);
+  const positions = new Float32Array([-0.5, 0.5, 0, 0.5, 0.5, 0, -0.5, -0.5, 0, 0.5, -0.5, 0]);
+  const texCoords = new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]);
 
   const positionBuffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
@@ -332,7 +346,7 @@ void main() {
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-  
+
   // High-res texture for billboard
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 800, 800, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
   gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
@@ -362,10 +376,10 @@ void main() {
     const fwd = glMatrix.vec3.fromValues(-Math.sin(camera.rotation[1]), 0, -Math.cos(camera.rotation[1]));
     const strafe = glMatrix.vec3.fromValues(Math.cos(camera.rotation[1]), 0, -Math.sin(camera.rotation[1]));
 
-    if (keys['KeyW']) { camera.position[0] += fwd[0]*speed; camera.position[2] += fwd[2]*speed; }
-    if (keys['KeyS']) { camera.position[0] -= fwd[0]*speed; camera.position[2] -= fwd[2]*speed; }
-    if (keys['KeyA']) { camera.position[0] -= strafe[0]*speed; camera.position[2] -= strafe[2]*speed; }
-    if (keys['KeyD']) { camera.position[0] += strafe[0]*speed; camera.position[2] += strafe[2]*speed; }
+    if (keys['KeyW']) { camera.position[0] += fwd[0] * speed; camera.position[2] += fwd[2] * speed; }
+    if (keys['KeyS']) { camera.position[0] -= fwd[0] * speed; camera.position[2] -= fwd[2] * speed; }
+    if (keys['KeyA']) { camera.position[0] -= strafe[0] * speed; camera.position[2] -= strafe[2] * speed; }
+    if (keys['KeyD']) { camera.position[0] += strafe[0] * speed; camera.position[2] += strafe[2] * speed; }
 
     if (canvas.width !== canvas.clientWidth || canvas.height !== canvas.clientHeight) {
       canvas.width = canvas.clientWidth;
@@ -402,17 +416,17 @@ void main() {
     // Dynamic Billboard Transform floating in space
     const floatY = Math.sin(time) * 0.2;
     const floatRot = Math.sin(time * 0.5) * 0.05;
-    
+
     const billboardMatrix = glMatrix.mat4.clone(viewMatrix);
     glMatrix.mat4.translate(billboardMatrix, billboardMatrix, [0, 2.5 + floatY, -5]);
     glMatrix.mat4.rotateY(billboardMatrix, billboardMatrix, floatRot);
     glMatrix.mat4.rotateX(billboardMatrix, billboardMatrix, floatRot * 0.5);
-    glMatrix.mat4.scale(billboardMatrix, billboardMatrix, [4.5, 4.5, 1]); 
+    glMatrix.mat4.scale(billboardMatrix, billboardMatrix, [4.5, 4.5, 1]);
 
     // Apply exact html-in-canvas element transform mapping
     const mvp = glMatrix.mat4.create();
     glMatrix.mat4.multiply(mvp, projectionMatrix, billboardMatrix);
-    
+
     const adjustment = glMatrix.mat4.create();
     glMatrix.mat4.translate(adjustment, adjustment, [-0.5, 0.5, 0]);
     glMatrix.mat4.scale(adjustment, adjustment, [1, -1, 1]);
@@ -429,7 +443,7 @@ void main() {
       const toCSSViewport = new DOMMatrix()
         .translate(canvas.width / 2, canvas.height / 2)
         .scale(canvas.width / 2, -canvas.height / 2, 1);
-      
+
       const finalTransform = toCSSViewport.multiply(mvpDOM).multiply(toGLModel);
       const transform = canvas.getElementTransform(draw_element, finalTransform);
       if (transform) {
@@ -442,10 +456,10 @@ void main() {
       gl.bindTexture(gl.TEXTURE_2D, texture);
       gl.texElementImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, draw_element);
     }
-    
+
     gl.uniformMatrix4fv(programInfo.uniforms.modelView, false, billboardMatrix);
     gl.uniform1i(programInfo.uniforms.useTexture, 1);
-    
+
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     requestAnimationFrame(render);
   }

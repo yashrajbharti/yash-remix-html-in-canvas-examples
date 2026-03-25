@@ -1,5 +1,6 @@
 <!doctype html>
 <html>
+
 <head>
     <meta charset="utf-8" />
     <title>Interactive 3D WebGL Library</title>
@@ -7,9 +8,18 @@
     <script type="module" src="js/material-web-bundle.js"></script>
 
     <style>
-        body { margin: 0; overflow: hidden;    touch-action: none; }
-        canvas { display: block; width: 100vw; height: 100vh; }
-        
+        body {
+            margin: 0;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+        }
+
         #ui-overlay {
             position: absolute;
             top: 20px;
@@ -18,14 +28,35 @@
             padding: 20px;
             border-radius: 12px;
             pointer-events: none;
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             z-index: 1000;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
-        
-        h1 { margin: 0 0 10px 0; font-size: 24px;  text-transform: uppercase; letter-spacing: 2px; }
-        .controls { font-size: 14px; color: #aaa; font-family: sans-serif; line-height: 1.6; }
-        .tag { display: inline-block; padding: 2px 6px; background: #ff007f; color: white; border-radius: 4px; font-weight: bold; font-size: 11px; margin-right: 5px; }
+
+        h1 {
+            margin: 0 0 10px 0;
+            font-size: 24px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .controls {
+            font-size: 14px;
+            color: #aaa;
+            font-family: sans-serif;
+            line-height: 1.6;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 2px 6px;
+            background: #ff007f;
+            color: white;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 11px;
+            margin-right: 5px;
+        }
 
         /* Bookshelf DOM Styles */
         #bookshelf {
@@ -38,7 +69,7 @@
             flex-direction: column;
             justify-content: space-between;
             padding: 20px;
-            box-shadow: inset 0 0 100px rgba(0,0,0,0.8);
+            box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.8);
             border-radius: 4px;
         }
 
@@ -50,7 +81,7 @@
             padding: 0 20px;
             gap: 15px;
         }
-        
+
         .shelf-row:last-child {
             border-bottom: none;
         }
@@ -70,14 +101,14 @@
             writing-mode: vertical-rl;
             text-orientation: mixed;
             cursor: pointer;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5), inset 0 0 20px rgba(255,255,255,0.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(255, 255, 255, 0.1);
             transition: transform 0.2s, box-shadow 0.2s;
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .book-spine:hover {
             transform: translateY(-10px) scale(1.05);
-            box-shadow: 0 15px 25px rgba(0,0,0,0.7), 0 0 20px rgba(255,0,127,0.5);
+            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.7), 0 0 20px rgba(255, 0, 127, 0.5);
             border-color: #ff007f;
         }
 
@@ -89,9 +120,21 @@
             letter-spacing: 1px;
         }
 
-        .spine-blue { background: linear-gradient(to right, #2980b9, #3498db); height: 200px; }
-        .spine-green { background: linear-gradient(to right, #27ae60, #2ecc71); height: 190px; }
-        .spine-gold { background: linear-gradient(to right, #f39c12, #f1c40f); height: 210px; color: #333; }
+        .spine-blue {
+            background: linear-gradient(to right, #2980b9, #3498db);
+            height: 200px;
+        }
+
+        .spine-green {
+            background: linear-gradient(to right, #27ae60, #2ecc71);
+            height: 190px;
+        }
+
+        .spine-gold {
+            background: linear-gradient(to right, #f39c12, #f1c40f);
+            height: 210px;
+            color: #333;
+        }
 
         /* Book Page DOM Styles */
         .book-page {
@@ -103,12 +146,13 @@
             box-sizing: border-box;
             padding: 80px;
             font-family: 'Georgia', serif;
-            box-shadow: inset 0 0 50px rgba(0,0,0,0.1);
+            box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.1);
             overflow: hidden;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            pointer-events: auto; /* enable interaction when active */
+            pointer-events: auto;
+            /* enable interaction when active */
         }
 
         .book-page.cover {
@@ -119,11 +163,31 @@
             padding: 40px;
         }
 
-        .book-page h2 { font-size: 60px; margin-bottom: 20px; text-align: center; }
-        .book-page p { font-size: 32px; line-height: 1.6; margin-bottom: 30px; text-align: justify; }
-        .page-number { position: absolute; bottom: 40px; width: 100%; text-align: center; font-size: 24px; left: 0; color: #777; }
+        .book-page h2 {
+            font-size: 60px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .book-page p {
+            font-size: 32px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            text-align: justify;
+        }
+
+        .page-number {
+            position: absolute;
+            bottom: 40px;
+            width: 100%;
+            text-align: center;
+            font-size: 24px;
+            left: 0;
+            color: #777;
+        }
     </style>
 </head>
+
 <body>
     <div id="ui-overlay">
         <h1>Grand Library</h1>
@@ -131,7 +195,8 @@
             <span class="tag">WASD</span> Walk<br>
             <span class="tag">Arrows</span> Look / Turn Pages<br>
             <span class="tag">Click</span> Books / Interactions<br>
-            <div id="prompt" style="margin-top:10px; color:#ff007f; font-weight:bold;">Find the Sherlock Holmes book on the shelf!</div>
+            <div id="prompt" style="margin-top:10px; color:#ff007f; font-weight:bold;">Find the Sherlock Holmes book on
+                the shelf!</div>
         </div>
     </div>
 
@@ -163,20 +228,26 @@
         <div id="page-1" class="book-page"></div>
         <div id="page-2" class="book-page">
             <h2>A Scandal in Bohemia</h2>
-            <p>To Sherlock Holmes she is always the woman. I have seldom heard him mention her under any other name. In his
+            <p>To Sherlock Holmes she is always the woman. I have seldom heard him mention her under any other name. In
+                his
                 eyes she eclipses and predominates the whole of her sex.</p>
-            <p>It was not that he felt any emotion akin to love for Irene Adler. All emotions were abhorrent to his cold, precise but admirably balanced mind.</p>
+            <p>It was not that he felt any emotion akin to love for Irene Adler. All emotions were abhorrent to his
+                cold, precise but admirably balanced mind.</p>
             <div class="page-number">2</div>
         </div>
         <div id="page-3" class="book-page">
-            <p>He was, I take it, the most perfect reasoning and observing machine that the world has seen, but as a lover
+            <p>He was, I take it, the most perfect reasoning and observing machine that the world has seen, but as a
+                lover
                 he would have placed himself in a false position.</p>
-            <p>He never spoke of the softer passions, save with a gibe and a sneer. They were admirable things for the observer.</p>
+            <p>He never spoke of the softer passions, save with a gibe and a sneer. They were admirable things for the
+                observer.</p>
             <div class="page-number">3</div>
         </div>
         <div id="page-4" class="book-page">
-            <p>I had seen little of Holmes lately. My marriage had drifted us away from each other. My own complete happiness was sufficient to absorb all my attention.</p>
-            <p>While Holmes, who loathed every form of society with his whole Bohemian soul, remained in our lodgings in Baker Street, buried among his old books.</p>
+            <p>I had seen little of Holmes lately. My marriage had drifted us away from each other. My own complete
+                happiness was sufficient to absorb all my attention.</p>
+            <p>While Holmes, who loathed every form of society with his whole Bohemian soul, remained in our lodgings in
+                Baker Street, buried among his old books.</p>
             <div class="page-number">4</div>
         </div>
         <div id="page-5" class="book-page cover" style="background-color:#1a252f;">
@@ -184,7 +255,7 @@
         </div>
     </canvas>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.8.1/gl-matrix-min.js"></script>
+    <script src="js/gl-matrix.js"></script>
     <script>
         // Polyfill glMatrix namespace for v2.8.1 CDN
         const glMatrix = {
@@ -356,8 +427,8 @@
 
         // --- Geometries ---
         // Simple Quad for Floor and Shelf
-        const quadPositions = new Float32Array([-0.5,0.5,0, 0.5,0.5,0, -0.5,-0.5,0, 0.5,-0.5,0]);
-        const quadUVs = new Float32Array([0,0, 1,0, 0,1, 1,1]);
+        const quadPositions = new Float32Array([-0.5, 0.5, 0, 0.5, 0.5, 0, -0.5, -0.5, 0, 0.5, -0.5, 0]);
+        const quadUVs = new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]);
 
         const quadVAO = gl.createVertexArray();
         gl.bindVertexArray(quadVAO);
@@ -382,7 +453,7 @@
         function createTexture(gl) {
             const t = gl.createTexture();
             gl.bindTexture(gl.TEXTURE_2D, t);
-            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([255,255,255,255]));
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([255, 255, 255, 255]));
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
@@ -393,9 +464,9 @@
         const shelfTex = createTexture(gl);
         const numPages = 6;
         const pages = [];
-        for(let i=0; i<numPages/2; i++){
+        for (let i = 0; i < numPages / 2; i++) {
             pages.push({
-                frontId: `page-${i*2}`, backId: `page-${i*2+1}`,
+                frontId: `page-${i * 2}`, backId: `page-${i * 2 + 1}`,
                 frontTex: createTexture(gl), backTex: createTexture(gl),
                 progress: 0, targetProgress: 0
             });
@@ -424,7 +495,7 @@
         let bookLerp = 0; // 0 = Shelf, 1 = Reader
         const shelfPos = [0, 2, -5];
         const shelfScale = [4, 2.4, 1]; // Maps 1000x600 ratio 1.666:1
-        
+
         let targetBookPos = glMatrix.vec3.create();
         let targetBookRot = glMatrix.vec3.create();
         let startBookPos = glMatrix.vec3.create();
@@ -436,17 +507,17 @@
                 currentBookState = BookState.PULLING;
                 bookLerp = 0;
                 document.getElementById('prompt').textContent = "Reading 'Scandal in Bohemia'. Use Arrow Left/Right to turn. Hit Space to close.";
-                
+
                 // Snap points
                 const fwd = glMatrix.vec3.fromValues(-Math.sin(camera.rotation[1]), 0, -Math.cos(camera.rotation[1]));
                 glMatrix.vec3.scaleAndAdd(targetBookPos, camera.position, fwd, 2.5); // 2.5 units in front
                 targetBookPos[1] = camera.position[1] - 0.2; // slightly lower than eye level
-                
+
                 targetBookRot[1] = camera.rotation[1] + 3.14159; // Face user
                 targetBookRot[0] = -0.2; // Tilt up slightly
-                
+
                 glMatrix.vec3.copy(startBookPos, shelfPos);
-                glMatrix.vec3.set(startBookRot, 0,0,0);
+                glMatrix.vec3.set(startBookRot, 0, 0, 0);
             }
         });
 
@@ -538,7 +609,7 @@
             // Floor
             const modelFloor = glMatrix.mat4.create();
             glMatrix.mat4.translate(modelFloor, modelFloor, [0, 0, 0]);
-            glMatrix.mat4.rotateX(modelFloor, modelFloor, -Math.PI/2);
+            glMatrix.mat4.rotateX(modelFloor, modelFloor, -Math.PI / 2);
             glMatrix.mat4.scale(modelFloor, modelFloor, [50, 50, 1]);
             gl.uniformMatrix4fv(unlitUniforms.model, false, modelFloor);
             gl.uniform4f(unlitUniforms.color, 0.1, 0.1, 0.12, 1.0);
@@ -582,7 +653,7 @@
                 // Smoothly interpolate position and rotation
                 const curPos = glMatrix.vec3.create();
                 glMatrix.vec3.lerp(curPos, startBookPos, targetBookPos, bookLerp);
-                
+
                 const curRot = glMatrix.vec3.create();
                 glMatrix.vec3.lerp(curRot, startBookRot, targetBookRot, bookLerp);
 
@@ -590,7 +661,7 @@
                 glMatrix.mat4.translate(modelBook, modelBook, curPos);
                 glMatrix.mat4.rotateY(modelBook, modelBook, curRot[1]);
                 glMatrix.mat4.rotateX(modelBook, modelBook, curRot[0]);
-                
+
                 // Centering adjustment for book (pivot around spine)
                 // The shader pivots around X=0. We want the book center (middle spine) to be at 'curPos'.
                 // If the pages rotate left (X goes negative), and the spine is X=0.
@@ -617,7 +688,7 @@
                     // Update ElementTransform for Book Pages (Reader interaction)
                     if (canvas.getElementTransform && currentBookState === BookState.READING) {
                         const toGLModel = new DOMMatrix().scale(PAGE_WIDTH / 800, -PAGE_HEIGHT / 1200, 1).translate(0, -1200 / 2);
-                        
+
                         const flatModelFront = glMatrix.mat4.clone(modelBook);
                         glMatrix.mat4.translate(flatModelFront, flatModelFront, [0, 0, zOffset]);
 
@@ -658,4 +729,5 @@
         requestAnimationFrame(render);
     </script>
 </body>
+
 </html>

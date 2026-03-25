@@ -4,15 +4,15 @@
 <head>
   <meta charset="utf-8" />
   <title>WebGL Liquid Glass Take 2</title>
-    <link rel="stylesheet" href="css/theme.css">
-    <script type="module" src="js/material-web-bundle.js"></script>
+  <link rel="stylesheet" href="css/theme.css">
+  <script type="module" src="js/material-web-bundle.js"></script>
 
   <style>
     body {
       margin: 0;
       overflow: hidden;
-      
-      
+
+
     }
 
     canvas {
@@ -57,7 +57,7 @@
   </canvas>
   <div id="glass-element"></div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.8.1/gl-matrix-min.js"></script>
+  <script src="js/gl-matrix.js"></script>
   <script>
     const canvas = document.getElementById('gl-canvas');
     const gl = canvas.getContext('webgl2', { alpha: false, premultipliedAlpha: false });

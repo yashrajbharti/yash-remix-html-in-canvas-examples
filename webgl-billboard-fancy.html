@@ -1,16 +1,16 @@
 <!doctype html>
 <meta charset="utf-8" />
 <title>WebGL Billboard - Bubbly UI</title>
-    <link rel="stylesheet" href="css/theme.css">
-    <script type="module" src="js/material-web-bundle.js"></script>
+<link rel="stylesheet" href="css/theme.css">
+<script type="module" src="js/material-web-bundle.js"></script>
 
 <style>
   body {
     margin: 0;
     overflow: hidden;
-    
-    
-    
+
+
+
   }
 
   canvas {
@@ -45,11 +45,11 @@
     width: 450px;
     height: 520px;
     border-radius: 40px;
-    
-    
+
+
     overflow: hidden;
     font-family: 'Nunito', sans-serif;
-    
+
     display: flex;
     flex-direction: column;
   }
@@ -119,10 +119,9 @@
     font-size: 30px;
     font-weight: 900;
     text-align: center;
-    
+
     -webkit-background-clip: text;
-    -webkit-text-fill-
-    
+    -webkit-text-fill-color: transparent;
   }
 
   /* Controls */
@@ -251,12 +250,12 @@
 
   .stat-box {
     flex: 1;
-    
-    
+
+
     border-radius: 20px;
     padding: 9px;
     text-align: center;
-    
+
     transition: transform 0.3s;
   }
 
@@ -324,36 +323,28 @@
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   }
 
-  .btn-primary {
-    
-    
-    
-  }
+  .btn-primary {}
 
   .btn-primary:active {
     transform: scale(0.95);
-    
+
   }
 
   .btn-primary:hover {
     transform: translateY(-2px);
-    
+
   }
 
-  .btn-secondary {
-    
-    
-    
-  }
+  .btn-secondary {}
 
   .btn-secondary:active {
     transform: scale(0.95);
-    
+
   }
 
   .btn-secondary:hover {
     transform: translateY(-2px);
-    
+
   }
 
   /* Emojis */
@@ -443,7 +434,7 @@
 </style>
 
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.8.1/gl-matrix-min.js"></script>
+<script src="js/gl-matrix.js"></script>
 
 <div id="info">
   Arrow Keys: Look Around<br>

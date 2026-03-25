@@ -1,16 +1,16 @@
 <!doctype html>
 <meta charset="utf-8" />
 <title>WebGL Billboard Example</title>
-    <link rel="stylesheet" href="css/theme.css">
-    <script type="module" src="js/material-web-bundle.js"></script>
+<link rel="stylesheet" href="css/theme.css">
+<script type="module" src="js/material-web-bundle.js"></script>
 
 <style>
   body {
     margin: 0;
     overflow: hidden;
-    
-    
-    
+
+
+
   }
 
   canvas {
@@ -52,11 +52,11 @@
   }
 
   .ui-panel {
-    
-    
+
+
     padding: 20px;
     font-size: 20px;
-    
+
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -64,12 +64,7 @@
   }
 
   @media (prefers-color-scheme: dark) {
-    .ui-panel {
-      
-      
-      border-
-      
-    }
+    .ui-panel {}
 
     .ui-panel input[type="text"] {
       background: #16213e;
@@ -80,7 +75,7 @@
 </style>
 
 <!-- gl-matrix for vector/matrix math -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.8.1/gl-matrix-min.js"></script>
+<script src="js/gl-matrix.js"></script>
 
 <script>
   // Use globals from gl-matrix script
@@ -89,7 +84,7 @@
   const canvas = document.getElementById('gl-canvas');
   const gl = canvas.getContext('webgl2');
 
-                    const draw_element = document.getElementById('draw_element');
+  const draw_element = document.getElementById('draw_element');
 
   if (!gl) {
     alert('WebGL2 not supported');
@@ -146,7 +141,7 @@ void main() {
   const vertexShader = createShader(gl, gl.VERTEX_SHADER, vsSource);
   const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fsSource);
   const program = gl.createProgram();
-                    gl.attachShader(program, vertexShader);
+  gl.attachShader(program, vertexShader);
   gl.attachShader(program, fragmentShader);
   gl.linkProgram(program);
 
@@ -205,7 +200,7 @@ void main() {
   gl.enableVertexAttribArray(programInfo.attribs.texCoord);
   gl.vertexAttribPointer(programInfo.attribs.texCoord, 2, gl.FLOAT, false, 0, 0);
 
-                    // Texture Initialization (HTML Element)
+  // Texture Initialization (HTML Element)
   const texture = gl.createTexture();
   gl.bindTexture(gl.TEXTURE_2D, texture);
 
@@ -383,7 +378,7 @@ void main() {
       gl.bindTexture(gl.TEXTURE_2D, texture);
       gl.texElementImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, draw_element);
     }
-    
+
     gl.uniformMatrix4fv(programInfo.uniforms.modelView, false, billboardMatrix);
     gl.uniform1i(programInfo.uniforms.useTexture, 1); // Texture mode
     gl.activeTexture(gl.TEXTURE0);
