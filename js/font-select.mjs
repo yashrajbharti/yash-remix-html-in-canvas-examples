@@ -111,13 +111,14 @@ template.innerHTML = `
     }
 
     :host {
-      --input-height: 1.3125em;
-      --autocomplete-height: 10em;
+      --input-height: 2.25rem;
+      --autocomplete-height: 18rem;
 
       height: var(--input-height);
       color-scheme: dark light;
       contain: content;
       display: block;
+      font-family: system-ui, sans-serif;
     }
 
     :host([hidden]) {
@@ -128,20 +129,28 @@ template.innerHTML = `
     input[disabled] {
       cursor: not-allowed;
       pointer-events: none;
-      color: GrayText;
+      color: var(--md-sys-color-on-surface-variant, GrayText);
+      opacity: 0.38;
     }
 
     ul {
-      color: CanvasText;
-      background-color: Canvas;
+      color: var(--md-sys-color-on-surface, CanvasText);
+      background-color: var(--md-sys-color-surface-container-high, Canvas);
       position: absolute;
-      margin: 0;
+      margin: 4px 0 0 0;
       list-style: none;
-      padding-inline-start: 0.25em;
+      padding: 0.5rem 0;
+      overflow-x: hidden;
       overflow-y: scroll;
       max-height: var(--autocomplete-height);
-      border: solid 1px FieldText;
-      z-index: 1;
+      border: 1px solid var(--md-sys-color-outline-variant, FieldText);
+      border-radius: 8px;
+      z-index: 1000;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    ul ul{
+      max-height: max-content;
     }
 
     .variation {
@@ -155,27 +164,28 @@ template.innerHTML = `
 
     li {
       user-select: none;
-      cursor: default;
+      cursor: pointer;
       white-space: nowrap;
+      padding: 0.4rem 1rem;
     }
 
     input,
     button {
-      font-size: inherit;
-      padding: 0.25rem;
-      background-color: Canvas;
-      color: CanvasText;
+      font-size: 1rem;
+      padding: 0 0.75rem;
+      background-color: var(--md-sys-color-surface-container, Canvas);
+      color: var(--md-sys-color-on-surface, CanvasText);
+      font-family: inherit;
     }
 
     input {
       height: var(--input-height);
-      margin-inline-end: -1px;
-      border-top-left-radius: 3px;
-      border-bottom-left-radius: 3px;
-      border-top: 2px inset;
+      margin-inline-end: 0;
+      border-top-left-radius: 8px;
+      border-bottom-left-radius: 8px;
+      border: 1px solid var(--md-sys-color-outline, inset);
       border-right: none;
-      border-bottom: 2px inset;
-      border-left: 2px inset;
+      transition: border-color 0.2s;
     }
 
     button:focus,
@@ -186,31 +196,29 @@ template.innerHTML = `
 
     button {
       appearance: none;
-      border-right: 2px inset;
-      border-bottom: 2px inset;
+      border: 1px solid var(--md-sys-color-outline, inset);
       border-left: none;
-      border-top: 2px inset;
-      border-top-right-radius: 3px;
-      border-bottom-right-radius: 3px;
+      border-top-right-radius: 8px;
+      border-bottom-right-radius: 8px;
       height: var(--input-height);
       width: var(--input-height);
       overflow: hidden;
+      cursor: pointer;
+      transition: border-color 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     button::before {
-      content: "▸";
-      color: GrayText;
+      content: "▼";
+      color: var(--md-sys-color-on-surface-variant, GrayText);
       display: inline-block;
-      position: relative;
-      top: -0.3em;
+      font-size: 0.7rem;
     }
 
     button[aria-expanded=true]::before {
-      transform: rotate(-90deg);
-    }
-
-    button[aria-expanded=false]::before {
-      transform: rotate(90deg);
+      transform: rotate(180deg);
     }
 
     input::-webkit-search-cancel-button {
@@ -222,6 +230,7 @@ template.innerHTML = `
       background-image: url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 10 10%22><text text-anchor=%22middle%22 fill=%22GrayText%22 x=%225%22 y=%220.5em%22 font-size=%221em%22>⨯</text></svg>");
       background-size: 0.75em;
       background-position: center;
+      cursor: pointer;
     }
 
     [part=font-family] {
@@ -230,9 +239,9 @@ template.innerHTML = `
       align-items: center;
     }
 
-    [part=font-family]:focus-within {
-      outline: auto 2px -webkit-focus-ring-color;
-      outline-offset: -1px;
+    [part=font-family]:focus-within input,
+    [part=font-family]:focus-within button {
+      border-color: var(--md-sys-color-primary, Highlight);
     }
 
     .spacer {
@@ -240,8 +249,8 @@ template.innerHTML = `
     }
 
     .highlight {
-      color: HighlightText;
-      background-color: Highlight;
+      color: var(--md-sys-color-on-secondary-container, HighlightText);
+      background-color: var(--md-sys-color-secondary-container, Highlight);
     }
   </style>
   <div>

@@ -53,7 +53,7 @@
             color: var(--md-sys-color-on-surface);
             box-sizing: border-box;
             padding: 80px;
-            font-family: 'Georgia', serif;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
             box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.1);
             overflow: hidden;
             display: flex;
@@ -106,6 +106,12 @@
     <div id="ui">
         <h1>WebGL Book</h1>
         Use Left/Right Arrow keys to turn pages. Try selecting the text!<br><br>
+        <div id="quick-fonts" style="margin-bottom: 12px; display: flex; gap: 12px; font-size: 14px; flex-wrap: wrap;">
+            <label><input type="radio" name="font" value="Georgia"> Georgia</label>
+            <label><input type="radio" name="font" value="Arial"> Arial</label>
+            <label><input type="radio" name="font" value="Courier New"> Courier</label>
+            <label><input type="radio" name="font" value="Times New Roman"> Times</label>
+        </div>
         <font-select id="book-font"></font-select>
     </div>
     <canvas id="gl-canvas" layoutsubtree>
@@ -165,9 +171,34 @@
 
         setupBookRendering(canvas, 6);
 
-        document.getElementById('book-font').addEventListener('change', (e) => {
-            const pages = document.querySelectorAll('.book-page');
-            pages.forEach(p => p.style.fontFamily = e.target.value);
+        const fontSelect = document.getElementById('book-font');
+        const radios = document.querySelectorAll('input[name="font"]');
+        const pages = document.querySelectorAll('.book-page');
+
+        fontSelect.addEventListener('change', (e) => {
+            const font = e.target.value;
+            pages.forEach(p => p.style.fontFamily = font);
+
+            let found = false;
+            radios.forEach(r => {
+                if (r.value.toLowerCase() === font.toLowerCase()) {
+                    r.checked = true;
+                    found = true;
+                }
+            });
+            if (!found) {
+                radios.forEach(r => r.checked = false);
+            }
+        });
+
+        radios.forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    const font = e.target.value;
+                    pages.forEach(p => p.style.fontFamily = font);
+                    fontSelect.value = font;
+                }
+            });
         });
     </script>
 </body>
