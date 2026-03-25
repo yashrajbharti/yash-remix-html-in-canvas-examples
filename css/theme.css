@@ -150,6 +150,9 @@ a{
 }
 
 footer {
+    position: fixed;
+    inset-block-end: 0;
+    inset-inline: 0;
     text-align: center;
     padding: 1rem;
     border-top: 1px solid var(--md-sys-color-outline);
