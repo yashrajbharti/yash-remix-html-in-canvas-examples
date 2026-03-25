@@ -111,8 +111,14 @@ h1,
 h2,
 h3,
 h4,
-p,div {
+p,
+div, 
+span {
     color: light-dark(var(--md-sys-color-on-surface), var(--md-sys-color-on-surface-variant));
+}
+
+a{
+    color: light-dark(var(--md-sys-color-primary), var(--md-sys-color-primary-container));
 }
 
 #main-nav {
