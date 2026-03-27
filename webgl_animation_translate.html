@@ -7,6 +7,11 @@
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
     <link rel="stylesheet" href="css/theme.css">
     <style>
+        ::selection {
+            background: rgba(255, 220, 0, 0.6);
+            color: #000;
+        }
+
         body {
             margin: 0;
             background-color: var(--md-sys-color-surface);
@@ -52,8 +57,63 @@
 
         #container {
             display: block;
+            position: relative;
             width: 100vw;
             height: 100vh;
+        }
+
+        /* Overlay canvas for HTML-in-Canvas labels */
+        #label-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: auto;
+            /* Allow click-through to labels */
+            z-index: 5;
+        }
+
+        /* Label chip styling */
+        .label {
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            background: #ff3d00 !important;
+            border: 3px solid #fff;
+            border-radius: 20px;
+            color: #fff;
+            font-size: 32px;
+            font-weight: 700;
+            white-space: nowrap;
+            cursor: default;
+            user-select: text;
+            transform-origin: 0 0;
+            opacity: 1 !important;
+        }
+
+        .label:hover {
+            background: rgba(20, 20, 40, 0.95);
+        }
+
+        .label::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent, #4fc3f7);
+            flex-shrink: 0;
+        }
+
+        .label .sub {
+            font-size: 10px;
+            opacity: 0.6;
+            display: block;
+            margin-top: 1px;
         }
     </style>
 </head>
@@ -67,6 +127,35 @@
         Model: <a href="https://artstation.com/artwork/1AGwX" target="_blank" rel="noopener">Littlest Tokyo</a> by
         <a href="https://artstation.com/glenatron" target="_blank" rel="noopener">Glen Fox</a>, CC Attribution.
     </div>
+
+    <!-- Transparent overlay canvas with layoutsubtree for HTML labels -->
+    <canvas id="label-canvas" layoutsubtree>
+        <!-- Labels are defined here as children; JS will position them via getElementTransform -->
+        <div class="label" id="lbl-gate" style="--accent:#4fc3f7">
+            Torii Gate
+            <span class="sub">Sacred entrance</span>
+        </div>
+        <div class="label" id="lbl-blossom" style="--accent:#f48fb1">
+            Cherry Blossom Tree
+            <span class="sub">桜 Sakura</span>
+        </div>
+        <div class="label" id="lbl-lantern" style="--accent:#ffb74d">
+            Stone Lantern
+            <span class="sub">灯籠 Tōrō</span>
+        </div>
+        <div class="label" id="lbl-shrine" style="--accent:#a5d6a7">
+            Main Shrine
+            <span class="sub">神社 Jinja</span>
+        </div>
+        <div class="label" id="lbl-pond" style="--accent:#80deea">
+            Koi Pond
+            <span class="sub">錦鯉 Nishikigoi</span>
+        </div>
+        <div class="label" id="lbl-path" style="--accent:#ce93d8">
+            Garden Path
+            <span class="sub">庭 Niwa</span>
+        </div>
+    </canvas>
 
     <script type="importmap">
         {
@@ -92,6 +181,7 @@
         let mixer;
 
         const timer = new THREE.Timer();
+
         timer.connect(document);
         const container = document.getElementById('container');
 
@@ -104,10 +194,13 @@
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
         container.appendChild(renderer.domElement);
 
+        // Move label canvas inside container so it stacks on top
+        const labelCanvas = document.getElementById('label-canvas');
+        container.appendChild(labelCanvas);
+        const labelCtx = labelCanvas.getContext('2d');
         const scene = new THREE.Scene();
 
         // Sky
-
         const sky = new Sky();
 
         const uniforms = sky.material.uniforms;
@@ -115,7 +208,7 @@
         uniforms['rayleigh'].value = 3;
         uniforms['mieDirectionalG'].value = 0.7;
         uniforms['cloudElevation'].value = 1;
-        uniforms['sunPosition'].value.set(- 0.8, 0.19, 0.56); // elevation: 11, azimuth: -55
+        uniforms['sunPosition'].value.set(- 0.8, 0.19, 0.56);
 
         const pmremGenerator = new THREE.PMREMGenerator(renderer);
         const environment = pmremGenerator.fromScene(sky).texture;
@@ -125,10 +218,84 @@
         const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 1, 100);
         camera.position.set(5, 2, 8);
 
-        const controls = new OrbitControls(camera, renderer.domElement);
+        const controls = new OrbitControls(camera, labelCanvas);
         controls.enableDamping = true;
         controls.target.set(0, 0.7, 0);
         controls.update();
+
+        // ─── HTML-in-Canvas Label System ─────────────────────────────────────────
+        // The model is placed at position (1, 1, 0) with scale 0.01.
+        // All world positions below are in Three.js world space.
+        // Adjust the `world` Vector3 values to fine-tune placement on the model.
+        const LABELS = [
+            {
+                el: document.getElementById('lbl-gate'),
+                world: new THREE.Vector3(0.0, 1.0, 0.0),
+            },
+            {
+                el: document.getElementById('lbl-blossom'),
+                world: new THREE.Vector3(0.2, 1.2, 0.0),
+            },
+            {
+                el: document.getElementById('lbl-lantern'),
+                world: new THREE.Vector3(-0.2, 0.8, 0.0),
+            },
+            {
+                el: document.getElementById('lbl-shrine'),
+                world: new THREE.Vector3(0.0, 1.4, 0.0),
+            },
+            {
+                el: document.getElementById('lbl-pond'),
+                world: new THREE.Vector3(0.3, 0.6, 0.0),
+            },
+            {
+                el: document.getElementById('lbl-path'),
+                world: new THREE.Vector3(-0.3, 1.0, 0.0),
+            },
+        ];
+
+        // Sync label canvas size with renderer
+        function syncLabelCanvasSize() {
+            labelCanvas.width = Math.floor(window.innerWidth * window.devicePixelRatio);
+            labelCanvas.height = Math.floor(window.innerHeight * window.devicePixelRatio);
+        }
+        syncLabelCanvasSize();
+
+        // Project a 3D world position → 2D DOMMatrix for getElementTransform
+        function updateLabels() {
+            const canvasW = labelCanvas.width;
+            const canvasH = labelCanvas.height;
+
+            LABELS.forEach(({ el, world }) => {
+                // Project from world space → NDC (x,y in [-1,1], z in [-1,1])
+                const ndc = world.clone().project(camera);
+
+                // Hide labels that are behind the camera or off-screen
+                const offscreen = ndc.z > 1 || Math.abs(ndc.x) > 1.3 || Math.abs(ndc.y) > 1.3;
+                el.style.opacity = offscreen ? '0' : '1';
+                el.style.pointerEvents = offscreen ? 'none' : 'auto';
+
+                if (offscreen) return;
+
+                // Convert NDC to canvas physical pixel coordinates
+                const px = (ndc.x + 1) * 0.5 * canvasW;
+                const py = (-ndc.y + 1) * 0.5 * canvasH;
+
+                // Build a simple translation matrix: place label origin at projected point
+                const matrix = new DOMMatrix().translate(px, py);
+
+                // getElementTransform returns corrected matrix for hit-testing & correct DPR
+                if (labelCanvas.getElementTransform) {
+                    el.style.transform = labelCanvas.getElementTransform(el, matrix).toString();
+                } else {
+                    // Fallback for non-supporting browsers: CSS pixels
+                    const cssX = (ndc.x + 1) * 0.5 * window.innerWidth;
+                    const cssY = (-ndc.y + 1) * 0.5 * window.innerHeight;
+                    el.style.transform = `translate(${cssX}px, ${cssY}px)`;
+                }
+            });
+        }
+        // ─────────────────────────────────────────────────────────────────────────
 
         const dracoLoader = new DRACOLoader();
         dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
@@ -154,12 +321,10 @@
         });
 
         window.onresize = function () {
-
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
-
             renderer.setSize(window.innerWidth, window.innerHeight);
-
+            syncLabelCanvasSize();
         };
 
         function animate() {
@@ -168,7 +333,7 @@
 
             const delta = timer.getDelta();
 
-            mixer.update(delta);
+            if (mixer) mixer.update(delta);
 
             controls.update();
 
@@ -176,8 +341,28 @@
 
             renderer.render(scene, camera);
 
+            // Sync HTML labels to 3D positions every frame
+            updateLabels();
+
+            labelCanvas.requestPaint();
         }
 
+        labelCanvas.onpaint = () => {
+            labelCtx.reset();
+
+            LABELS.forEach(({ el }) => {
+                try {
+                    const transform = labelCtx.drawElementImage(el, 0, 0);
+
+                    // Sync DOM position for interaction
+                    if (transform) {
+                        el.style.transform = transform.toString();
+                    }
+                } catch (e) {
+                    // Happens before first snapshot sometimes
+                }
+            });
+        };
 
     </script>
 
