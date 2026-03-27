@@ -6,12 +6,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
     <link rel="stylesheet" href="css/theme.css">
+    <script type="module" src="js/material-web-bundle.js"></script>
     <style>
-        ::selection {
-            background: rgba(255, 220, 0, 0.6);
-            color: #000;
-        }
-
         body {
             margin: 0;
             background-color: var(--md-sys-color-surface);
@@ -72,48 +68,77 @@
             pointer-events: auto;
             /* Allow click-through to labels */
             z-index: 5;
+
+            & ::selection {
+                background-color: rgba(255, 220, 0, 0.6);
+                color: #000;
+            }
         }
 
-        /* Label chip styling */
+        #controls {
+            position: absolute;
+            top: 24px;
+            left: 24px;
+            z-index: 20;
+            background: var(--md-sys-color-surface-container);
+            padding: 16px;
+            border-radius: 16px;
+            box-shadow: var(--md-sys-elevation-level2);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-width: 200px;
+        }
+
+        #controls h1 {
+            margin: 0 0 8px 0;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface-variant);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Label chip styling - MD3 inspired, Static */
         .label {
             position: absolute;
             top: 0;
             left: 0;
             display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 12px 20px;
-            background: #ff3d00 !important;
-            border: 3px solid #fff;
-            border-radius: 20px;
-            color: #fff;
-            font-size: 32px;
-            font-weight: 700;
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 10px 18px;
+            background: var(--md-sys-color-secondary-container) !important;
+            border: 1px solid var(--md-sys-color-outline-variant);
+            border-radius: 12px;
+            color: var(--md-sys-color-on-secondary-container);
+            font-size: 15px;
+            font-weight: 600;
             white-space: nowrap;
-            cursor: default;
+            cursor: text;
             user-select: text;
             transform-origin: 0 0;
-            opacity: 1 !important;
+            box-shadow: var(--md-sys-elevation-level2);
+            opacity: 1;
         }
 
-        .label:hover {
-            background: rgba(20, 20, 40, 0.95);
-        }
-
-        .label::before {
-            content: '';
-            width: 8px;
-            height: 8px;
+        /* The "Pin" at the 3D point - More visible */
+        .pin {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            background: var(--md-sys-color-primary);
+            border: 2px solid #fff;
             border-radius: 50%;
-            background: var(--accent, #4fc3f7);
-            flex-shrink: 0;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
         }
 
         .label .sub {
-            font-size: 10px;
-            opacity: 0.6;
-            display: block;
-            margin-top: 1px;
+            font-size: 11px;
+            opacity: 0.8;
+            font-weight: 400;
+            color: var(--md-sys-color-on-secondary-container);
         }
     </style>
 </head>
@@ -121,6 +146,27 @@
 <body>
 
     <div id="container"></div>
+
+    <div id="controls">
+        <h1>Translation Settings</h1>
+        <md-filled-select id="lang-select" label="Select Language" value="jp">
+            <md-select-option value="en">
+                <div slot="headline">English</div>
+            </md-select-option>
+            <md-select-option value="jp">
+                <div slot="headline">Japanese (日本語)</div>
+            </md-select-option>
+            <md-select-option value="es">
+                <div slot="headline">Spanish (Español)</div>
+            </md-select-option>
+        </md-filled-select>
+
+        <label
+            style="display: flex; align-items: center; gap: 8px; color: var(--md-sys-color-on-surface); font-size: 14px; cursor: pointer; margin-top: 8px;">
+            <md-checkbox id="toggle-labels" touch-target="wrapper" checked></md-checkbox>
+            Show 3D Labels
+        </label>
+    </div>
 
     <div id="info">
         <a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> webgl - animation - keyframes<br />
@@ -130,30 +176,33 @@
 
     <!-- Transparent overlay canvas with layoutsubtree for HTML labels -->
     <canvas id="label-canvas" layoutsubtree>
+        <!-- The Pin (reused or one per label) -->
+        <div class="pin" id="pin-element"></div>
+
         <!-- Labels are defined here as children; JS will position them via getElementTransform -->
-        <div class="label" id="lbl-gate" style="--accent:#4fc3f7">
-            Torii Gate
-            <span class="sub">Sacred entrance</span>
+        <div class="label" id="lbl-gate">
+            鳥居 Torii Gate
+            <span class="sub">Sacred Entrance</span>
         </div>
-        <div class="label" id="lbl-blossom" style="--accent:#f48fb1">
-            Cherry Blossom Tree
-            <span class="sub">桜 Sakura</span>
+        <div class="label" id="lbl-blossom">
+            桜 Sakura Tree
+            <span class="sub">Cherry Blossom</span>
         </div>
-        <div class="label" id="lbl-lantern" style="--accent:#ffb74d">
-            Stone Lantern
-            <span class="sub">灯籠 Tōrō</span>
+        <div class="label" id="lbl-lantern">
+            灯篭 Stone Lantern
+            <span class="sub">Traditional Tōrō</span>
         </div>
-        <div class="label" id="lbl-shrine" style="--accent:#a5d6a7">
-            Main Shrine
-            <span class="sub">神社 Jinja</span>
+        <div class="label" id="lbl-shrine">
+            神社 Main Shrine
+            <span class="sub">Principal Jinja</span>
         </div>
-        <div class="label" id="lbl-pond" style="--accent:#80deea">
-            Koi Pond
-            <span class="sub">錦鯉 Nishikigoi</span>
+        <div class="label" id="lbl-pond">
+            鯉の池 Koi Pond
+            <span class="sub">Nishikigoi Habitat</span>
         </div>
-        <div class="label" id="lbl-path" style="--accent:#ce93d8">
-            Garden Path
-            <span class="sub">庭 Niwa</span>
+        <div class="label" id="lbl-path">
+            庭の道 Garden Path
+            <span class="sub">Zen Walkway</span>
         </div>
     </canvas>
 
@@ -178,7 +227,9 @@
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
         import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 
-        let mixer;
+        let mixer, model;
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
 
         const timer = new THREE.Timer();
 
@@ -186,9 +237,12 @@
         const container = document.getElementById('container');
 
         const stats = new Stats();
+        stats.dom.style.top = '0px';
+        stats.dom.style.right = '0px';
+        stats.dom.style.left = 'auto'; // Clear default left: 0
         container.appendChild(stats.dom);
 
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setPixelRatio(window.devicePixelRatio);
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -198,6 +252,7 @@
         const labelCanvas = document.getElementById('label-canvas');
         container.appendChild(labelCanvas);
         const labelCtx = labelCanvas.getContext('2d');
+        const pinElement = document.getElementById('pin-element');
         const scene = new THREE.Scene();
 
         // Sky
@@ -226,33 +281,90 @@
         // ─── HTML-in-Canvas Label System ─────────────────────────────────────────
         // The model is placed at position (1, 1, 0) with scale 0.01.
         // All world positions below are in Three.js world space.
-        // Adjust the `world` Vector3 values to fine-tune placement on the model.
         const LABELS = [
             {
+                id: 'lbl-gate',
                 el: document.getElementById('lbl-gate'),
-                world: new THREE.Vector3(0.0, 1.0, 0.0),
+                world: new THREE.Vector3(1.0, 1.8, 0.8),
+                px: 0, py: 0, offscreen: true, labelOccluded: true
             },
             {
+                id: 'lbl-blossom',
                 el: document.getElementById('lbl-blossom'),
-                world: new THREE.Vector3(0.2, 1.2, 0.0),
+                world: new THREE.Vector3(2.5, 2.5, -1.5),
+                px: 0, py: 0, offscreen: true, labelOccluded: true
             },
             {
+                id: 'lbl-lantern',
                 el: document.getElementById('lbl-lantern'),
-                world: new THREE.Vector3(-0.2, 0.8, 0.0),
+                world: new THREE.Vector3(-1.0, 1.2, 2.0),
+                px: 0, py: 0, offscreen: true, labelOccluded: true
             },
             {
+                id: 'lbl-shrine',
                 el: document.getElementById('lbl-shrine'),
-                world: new THREE.Vector3(0.0, 1.4, 0.0),
+                world: new THREE.Vector3(0.5, 2.5, -2.5),
+                px: 0, py: 0, offscreen: true, labelOccluded: true
             },
             {
+                id: 'lbl-pond',
                 el: document.getElementById('lbl-pond'),
-                world: new THREE.Vector3(0.3, 0.6, 0.0),
+                world: new THREE.Vector3(3.0, 0.8, 1.5),
+                px: 0, py: 0, offscreen: true, labelOccluded: true
             },
             {
+                id: 'lbl-path',
                 el: document.getElementById('lbl-path'),
-                world: new THREE.Vector3(-0.3, 1.0, 0.0),
+                world: new THREE.Vector3(-2.0, 0.9, 0.0),
+                px: 0, py: 0, offscreen: true, labelOccluded: true
             },
         ];
+
+        const TRANSLATIONS = {
+            en: {
+                'lbl-gate': { main: 'Torii Gate', sub: 'Sacred Entrance' },
+                'lbl-blossom': { main: 'Sakura Tree', sub: 'Cherry Blossom' },
+                'lbl-lantern': { main: 'Stone Lantern', sub: 'Traditional Tōrō' },
+                'lbl-shrine': { main: 'Main Shrine', sub: 'Principal Jinja' },
+                'lbl-pond': { main: 'Koi Pond', sub: 'Nishikigoi Habitat' },
+                'lbl-path': { main: 'Garden Path', sub: 'Zen Walkway' }
+            },
+            jp: {
+                'lbl-gate': { main: '鳥居', sub: 'Torii Gate' },
+                'lbl-blossom': { main: '桜', sub: 'Sakura Tree' },
+                'lbl-lantern': { main: '灯篭', sub: 'Stone Lantern' },
+                'lbl-shrine': { main: '神社', sub: 'Main Shrine' },
+                'lbl-pond': { main: '鯉の池', sub: 'Koi Pond' },
+                'lbl-path': { main: '庭の道', sub: 'Garden Path' }
+            },
+            es: {
+                'lbl-gate': { main: 'Puerta Torii', sub: 'Entrada Sagrada' },
+                'lbl-blossom': { main: 'Cerezo', sub: 'Flor de Sakura' },
+                'lbl-lantern': { main: 'Linterna', sub: 'Linterna de Piedra' },
+                'lbl-shrine': { main: 'Santuario', sub: 'Edificio Principal' },
+                'lbl-pond': { main: 'Estanque Koi', sub: 'Hábitat de Peces' },
+                'lbl-path': { main: 'Sendero', sub: 'Camino del Jardín' }
+            }
+        };
+
+        const langSelect = document.getElementById('lang-select');
+        langSelect.addEventListener('change', (e) => {
+            const lang = e.target.value;
+            const data = TRANSLATIONS[lang];
+            LABELS.forEach(lbl => {
+                const trans = data[lbl.id];
+                lbl.el.childNodes[0].textContent = trans.main + ' ';
+                lbl.el.querySelector('.sub').textContent = trans.sub;
+            });
+            labelCanvas.requestPaint();
+        });
+
+        let labelsVisible = true;
+        const toggleCheckbox = document.getElementById('toggle-labels');
+        toggleCheckbox.addEventListener('change', (e) => {
+            labelsVisible = e.target.checked;
+            labelCanvas.requestPaint();
+        });
 
         // Sync label canvas size with renderer
         function syncLabelCanvasSize() {
@@ -266,33 +378,47 @@
             const canvasW = labelCanvas.width;
             const canvasH = labelCanvas.height;
 
-            LABELS.forEach(({ el, world }) => {
+            LABELS.forEach((lbl) => {
+                const { el, world } = lbl;
                 // Project from world space → NDC (x,y in [-1,1], z in [-1,1])
                 const ndc = world.clone().project(camera);
 
-                // Hide labels that are behind the camera or off-screen
-                const offscreen = ndc.z > 1 || Math.abs(ndc.x) > 1.3 || Math.abs(ndc.y) > 1.3;
-                el.style.opacity = offscreen ? '0' : '1';
-                el.style.pointerEvents = offscreen ? 'none' : 'auto';
+                // Basic frustum clipping
+                lbl.offscreen = ndc.z > 1 || Math.abs(ndc.x) > 1.3 || Math.abs(ndc.y) > 1.3;
 
-                if (offscreen) return;
+                // ─── Occlusion Check via Raycaster (Only for the label itself) ───
+                let isOccluded = false;
+                if (!lbl.offscreen && model) {
+                    mouse.x = ndc.x;
+                    mouse.y = ndc.y;
+                    raycaster.setFromCamera(mouse, camera);
+
+                    const intersects = raycaster.intersectObject(model, true);
+                    if (intersects.length > 0) {
+                        const distToHit = intersects[0].distance;
+                        const distToLabel = world.distanceTo(camera.position);
+                        if (distToHit < (distToLabel - 0.1)) {
+                            isOccluded = true;
+                        }
+                    }
+                }
+
+                lbl.labelOccluded = isOccluded;
+                // Only show labels if toggle is on
+                el.style.opacity = (lbl.offscreen || lbl.labelOccluded || !labelsVisible) ? '0' : '1';
+                el.style.pointerEvents = (lbl.offscreen || lbl.labelOccluded || !labelsVisible) ? 'none' : 'auto';
+
+                if (lbl.offscreen) return;
 
                 // Convert NDC to canvas physical pixel coordinates
-                const px = (ndc.x + 1) * 0.5 * canvasW;
-                const py = (-ndc.y + 1) * 0.5 * canvasH;
+                lbl.px = (ndc.x + 1) * 0.5 * canvasW;
+                lbl.py = (-ndc.y + 1) * 0.5 * canvasH;
 
-                // Build a simple translation matrix: place label origin at projected point
-                const matrix = new DOMMatrix().translate(px, py);
-
-                // getElementTransform returns corrected matrix for hit-testing & correct DPR
-                if (labelCanvas.getElementTransform) {
-                    el.style.transform = labelCanvas.getElementTransform(el, matrix).toString();
-                } else {
-                    // Fallback for non-supporting browsers: CSS pixels
-                    const cssX = (ndc.x + 1) * 0.5 * window.innerWidth;
-                    const cssY = (-ndc.y + 1) * 0.5 * window.innerHeight;
-                    el.style.transform = `translate(${cssX}px, ${cssY}px)`;
-                }
+                // Project "Ground" position (y=-2 in scene space for depth)
+                const groundWorld = new THREE.Vector3(world.x, -1, world.z);
+                const groundNdc = groundWorld.project(camera);
+                lbl.groundPx = (groundNdc.x + 1) * 0.5 * canvasW;
+                lbl.groundPy = (-groundNdc.y + 1) * 0.5 * canvasH;
             });
         }
         // ─────────────────────────────────────────────────────────────────────────
@@ -304,7 +430,7 @@
         loader.setDRACOLoader(dracoLoader);
         loader.load('./assets/LittlestTokyo.glb', function (gltf) {
 
-            const model = gltf.scene;
+            model = gltf.scene;
             model.position.set(1, 1, 0);
             model.scale.set(0.01, 0.01, 0.01);
             scene.add(model);
@@ -350,16 +476,47 @@
         labelCanvas.onpaint = () => {
             labelCtx.reset();
 
-            LABELS.forEach(({ el }) => {
-                try {
-                    const transform = labelCtx.drawElementImage(el, 0, 0);
+            if (!labelsVisible) return;
 
-                    // Sync DOM position for interaction
-                    if (transform) {
-                        el.style.transform = transform.toString();
+            LABELS.forEach(({ el, px, py, groundPx, groundPy, offscreen, labelOccluded }) => {
+                if (offscreen) return;
+
+                try {
+                    // 1. Draw a "Ground Line" from the floor to the pin
+                    labelCtx.beginPath();
+                    labelCtx.moveTo(groundPx, groundPy);
+                    labelCtx.lineTo(px, py);
+                    labelCtx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+                    labelCtx.setLineDash([5, 5]); // Dashed line
+                    labelCtx.lineWidth = 1 * window.devicePixelRatio;
+                    labelCtx.stroke();
+                    labelCtx.setLineDash([]); // Reset dash
+
+                    // 2. Draw the label chip (Occlusion aware)
+                    if (!labelOccluded) {
+                        // Position ABOVE the pin, horizontally centered
+                        const labelW = el.offsetWidth * window.devicePixelRatio;
+                        const labelH = el.offsetHeight * window.devicePixelRatio;
+                        const labelYOffset = 2 * window.devicePixelRatio; // Gap/Overlap
+
+                        const drawX = px - labelW / 2;
+                        const drawY = py - labelH + (labelYOffset * 1); // Allow small overlap so pin is on bottom edge
+
+                        const matrix = new DOMMatrix().translate(drawX, drawY);
+                        labelCtx.drawElementImage(el, drawX, drawY);
+
+                        // 3. Synchronize the DOM element's position for hit-testing/interaction
+                        if (labelCanvas.getElementTransform) {
+                            el.style.transform = labelCanvas.getElementTransform(el, matrix).toString();
+                            el.style.transformOrigin = '0 0';
+                        }
                     }
+
+                    // 4. Draw a small "Pin" point (Center it on px, py) - Drawn LAST to be on top in Z-index
+                    const pinSize = 14 * window.devicePixelRatio;
+                    labelCtx.drawElementImage(pinElement, px - pinSize / 2, py - pinSize / 2);
                 } catch (e) {
-                    // Happens before first snapshot sometimes
+                    // Snapshot might not be ready on first frames
                 }
             });
         };
