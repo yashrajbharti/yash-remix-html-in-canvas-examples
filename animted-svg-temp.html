@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HTML in Canvas: Meet Scribble</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #22222d;
+            display: grid;
+            place-items: center;
+            block-size: 100vh;
+        }
+
+        .line {
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation:
+                drawLine 4s linear forwards,
+                fadeDown 0.6s linear forwards;
+        }
+
+        .line1 {
+            animation-delay: 0s, 3.6s;
+        }
+
+        .line2 {
+            animation-delay: 1.4s, 3.6s;
+        }
+
+        .line3 {
+            animation-delay: 1.85s, 3.6s;
+        }
+
+        .line4 {
+            animation-delay: 2.85s, 3.6s;
+        }
+
+        @keyframes drawLine {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        @keyframes fadeDown {
+            0% {
+                opacity: 1;
+                translate: 0 0px;
+                filter: brightness(1) grayscale(0);
+            }
+
+            99% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0;
+                translate: 0 40px;
+                filter: brightness(2) grayscale(1);
+            }
+        }
+
+        figure {
+            position: relative;
+        }
+
+        figcaption {
+            /* visually hidden */
+            clip-path: inset(50%);
+            height: 1px;
+            overflow: hidden;
+            position: absolute;
+            white-space: nowrap;
+            width: 1px;
+        }
+
+        .pen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            offset-path: path("M50 189.848C51.3891 188.229 54.1743 185.437 57.5493 182.878C60.6378 180.537 64.3936 175.455 67.5593 171.825C69.9607 169.071 73.7195 167.287 75.9358 164.844C78.1522 162.401 80.6999 159.846 83.4956 158.209C86.5117 156.443 89.0764 155.183 95.2332 155.292C98.7001 155.352 98.6256 160.516 99.6727 163.312C100.829 166.398 103.735 168.432 105.142 170.991C106.562 173.573 107.002 176.571 108.744 179.252C111.342 183.251 119.79 180.313 122.586 178.802C125.291 177.339 128.167 176.125 131.078 174.613C134.218 172.983 137.241 172.634 141.196 172.282C144.546 171.983 149.094 171.001 156.633 170.422C170.08 169.388 180.059 170.533 183.989 170.882C197.924 172.12 200.763 169.382 203.559 168.097C204.574 167.631 205.627 166.956 206.72 166.141M206.72 166.141C209.606 163.988 212.769 160.854 216.232 157.986C220.5 154.451 224.259 153.327 227.408 151.348C230.939 149.128 232.65 147.275 233.117 145.882C234.083 143.006 228.911 138.364 226 136.5C222.652 134.357 219 133.309 216.232 131.321C213 129 209 126.445 204.746 126.445C200.769 126.445 197.538 129.104 194.505 131.321C191.512 133.508 190.083 136.783 188.914 139.694C187.375 143.526 189.134 147.952 190.533 150.747C192.098 153.873 196.324 158.171 200.299 161.567C202.75 163.66 204.751 164.99 206.72 166.141ZM206.72 166.141C207.933 166.85 209.134 167.491 210.421 168.202C213.844 170.092 216.818 172.858 221.003 174.599C225.386 176.424 227.987 178.205 233.795 180.533C236.126 181.234 237.766 181.702 239.274 182.051C240.091 182.17 245.551 184.198 246.5 183.5M237.5 182C239.119 182.23 248.216 183.091 251.724 184.955C254.583 186.474 263.754 187.056 275.897 184.044C281.509 182.652 286.148 181.709 292.074 180.316C303.871 177.544 308.261 174.728 311.637 173.797C314.551 172.865 317.336 171.706 319.776 170.544C320.833 170.073 321.524 169.842 322.236 169.605C329.615 169.605 382.166 176.352 387.649 176.942C393.332 177.554 401.265 177.986 409.854 178.108C414.144 178.169 417.32 176.366 420.695 175.434C423.719 174.599 426.394 172.415 431.507 167.77C434.446 165.1 438.722 163.118 441.755 160.2C445.025 157.054 448.739 154.259 450.246 154.026C451.053 153.9 451.984 154.252 452.689 154.717C455.454 156.537 456.647 160.06 458.511 163.435C460.183 166.463 462.232 169.135 464.211 171.815C466.111 174.389 484.876 174.035 494.809 171.372C498.036 170.507 497.371 165.672 498.3 161.945C500.052 154.908 513.175 169.372 517.834 171.815C522.888 174.465 528.769 175.654 540.723 176.244C547.616 176.827 552.279 176.366 554.021 175.553C554.841 175.201 555.532 174.97 557.64 174.035L591.684 176.698C597.907 176.698 610.116 176.698 622.694 176"
+                );
+            offset-distance: 0%;
+            offset-rotate: 0deg;
+            translate: -5px -75px;
+            animation:
+                movePenAlongPath 3s linear forwards,
+                fadeOut 1s linear 3.6s forwards;
+        }
+
+        .pen-body {
+            animation: fadeOut 1s linear 3.5s forwards;
+        }
+
+        @keyframes movePenAlongPath {
+            to {
+                offset-distance: 100%;
+            }
+        }
+
+        @keyframes fadeOut {
+            0% {
+                opacity: 0;
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+
+        .gemini1 {
+            animation: move 1.2s linear forwards;
+            transform-origin: 0;
+        }
+
+        .gemini2 {
+            opacity: 0;
+            translate: 0px 40px;
+            transform-origin: 0;
+            animation:
+                appear 0.6s linear 0.2s forwards,
+                move 1.2s linear 0.2s forwards;
+        }
+
+        @keyframes move {
+            from {
+                scale: 1;
+            }
+
+            to {
+                scale: 0;
+            }
+        }
+
+        @keyframes appear {
+            0% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <canvas id="scribbleCanvas" width="716" height="240" layoutsubtree style="width: 716px; height: 240px">
+            <div id="scribble_container">
+                <figure>
+                    <svg width="716" height="240" viewBox="0 0 716 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <g clip-path="url(#clip0_243_198)">
+                            <mask id="mask0_243_198" style="mask-type: alpha" maskUnits="userSpaceOnUse" x="558" y="-6"
+                                width="215" height="215">
+                                <rect x="558" y="70.3893" width="157.565" height="157.565"
+                                    transform="rotate(-29 558 70.3893)" fill="#D9D9D9" />
+                            </mask>
+
+                            <path class="line1 line"
+                                d="M50 189.848C51.3891 188.229 54.1743 185.437 57.5493 182.878C60.6378 180.537 64.3936 175.455 67.5593 171.825C69.9607 169.071 73.7195 167.287 75.9358 164.844C78.1522 162.401 80.6999 159.846 83.4956 158.209C86.5117 156.443 89.0764 155.183 95.2332 155.292C98.7001 155.352 98.6256 160.516 99.6727 163.312C100.829 166.398 103.735 168.432 105.142 170.991C106.562 173.573 107.002 176.571 108.744 179.252C111.342 183.251 119.79 180.313 122.586 178.802C125.291 177.339 128.167 176.125 131.078 174.613C134.218 172.983 137.241 172.634 141.196 172.282C144.546 171.983 149.094 171.001 156.633 170.422C170.08 169.388 180.059 170.533 183.989 170.882C197.924 172.12 200.763 169.382 203.559 168.097C207.254 166.399 211.457 161.94 216.232 157.986C220.5 154.451 224.259 153.327 227.408 151.348C230.939 149.128 232.65 147.275 233.117 145.882C234.083 143.006 228.911 138.364 226 136.5C222.652 134.357 219 133.309 216.232 131.321C213 129 209 126.445 204.746 126.445C200.769 126.445 197.538 129.104 194.505 131.321C191.512 133.508 190.083 136.783 188.914 139.694C187.375 143.526 189.134 147.952 190.533 150.747C192.098 153.873 196.324 158.171 200.299 161.567C204.259 164.95 207.046 166.338 210.421 168.202C213.844 170.092 216.818 172.858 221.003 174.599C225.386 176.424 227.987 178.205 233.795 180.533C236.126 181.234 237.766 181.702 239.274 182.051C240.091 182.17 245.551 184.198 246.5 183.5"
+                                stroke="#298EF7" stroke-width="15" stroke-linecap="round" />
+
+                            <path class="line2 line"
+                                d="M237.5 182C239.119 182.23 248.216 183.091 251.724 184.955C254.583 186.474 263.754 187.056 275.897 184.044C281.509 182.652 286.148 181.709 292.074 180.316C303.871 177.544 308.262 174.728 311.637 173.797C314.551 172.865 317.336 171.706 319.776 170.544C320.833 170.073 321.524 169.842 322.236 169.605"
+                                stroke="url(#paint0_linear_243_198)" stroke-width="15" stroke-linecap="round" />
+
+                            <path class="line3 line"
+                                d="M358 175.431C365.378 175.431 382.166 176.352 387.649 176.942C393.332 177.554 401.265 177.986 409.854 178.108C414.144 178.169 417.32 176.366 420.695 175.434C423.719 174.599 426.394 172.415 431.507 167.77C434.446 165.1 438.722 163.118 441.755 160.2C445.025 157.054 448.739 154.259 450.246 154.026C451.053 153.9 451.984 154.252 452.689 154.717C455.454 156.537 456.647 160.06 458.511 163.435C460.183 166.463 462.232 169.135 464.211 171.815C466.111 174.389 484.876 174.035 494.809 171.372C498.036 170.507 497.371 165.672 498.3 161.945C500.052 154.908 513.175 169.372 517.834 171.815C522.888 174.465 528.769 175.654 540.723 176.244C547.616 176.827 552.279 176.366 554.021 175.553C554.841 175.201 555.532 174.97 557.64 174.035"
+                                stroke="url(#paint1_linear_243_198)" stroke-width="15" stroke-linecap="round" />
+
+                            <path class="line4 line"
+                                d="M585 176.698C585.23 176.698 585.461 176.698 591.684 176.698C597.907 176.698 610.116 176.698 622.694 176"
+                                stroke="#A88EEC" stroke-width="15" stroke-linecap="round" />
+
+                            <g clip-path="url(#clip1_243_198)" class="gemini gemini1">
+                                <path
+                                    d="M9 196H24C24 204.284 17.2843 211 9 211C0.715728 211 -6 204.284 -6 196C-6 187.716 0.715728 181 9 181V196ZM39 181C47.2843 181 54 187.716 54 196C54 204.284 47.2843 211 39 211C30.7157 211 24 204.284 24 196H39V181ZM24 166C24 174.284 30.7157 181 39 181C30.7157 181 24 187.716 24 196C24 187.716 17.2843 181 9 181C17.2843 181 24 174.284 24 166ZM9 151C17.2843 151 24 157.716 24 166H9V181C0.715728 181 -6 174.284 -6 166C-6 157.716 0.715728 151 9 151ZM39 151C47.2843 151 54 157.716 54 166C54 174.284 47.2843 181 39 181V166H24C24 157.716 30.7157 151 39 151Z"
+                                    fill="#298EF7" />
+                            </g>
+
+                            <g clip-path="url(#clip2_243_198)" class="gemini gemini2">
+                                <path
+                                    d="M18.5 163.5H29C29 169.299 24.299 174 18.5 174C12.701 174 8 169.299 8 163.5C8 157.701 12.701 153 18.5 153V163.5ZM39.5 153C45.299 153 50 157.701 50 163.5C50 169.299 45.299 174 39.5 174C33.701 174 29 169.299 29 163.5H39.5V153ZM29 142.5C29 148.299 33.701 153 39.5 153C33.701 153 29 157.701 29 163.5C29 157.701 24.299 153 18.5 153C24.299 153 29 148.299 29 142.5ZM18.5 132C24.299 132 29 136.701 29 142.5H18.5V153C12.701 153 8 148.299 8 142.5C8 136.701 12.701 132 18.5 132ZM39.5 132C45.299 132 50 136.701 50 142.5C50 148.299 45.299 153 39.5 153V142.5H29C29 136.701 33.701 132 39.5 132Z"
+                                    fill="#298EF7" />
+                            </g>
+                        </g>
+
+                        <defs>
+                            <linearGradient id="paint0_linear_243_198" x1="241.961" y1="177.903" x2="322.236"
+                                y2="177.903" gradientUnits="userSpaceOnUse">
+                                <stop stop-color="#298EF7" />
+
+                                <stop offset="1" stop-color="#5791F4" />
+                            </linearGradient>
+
+                            <linearGradient id="paint1_linear_243_198" x1="358" y1="166.055" x2="557.64" y2="166.055"
+                                gradientUnits="userSpaceOnUse">
+                                <stop stop-color="#6A90F2" />
+
+                                <stop offset="1" stop-color="#9E8DED" />
+                            </linearGradient>
+
+                            <clipPath id="clip0_243_198">
+                                <rect width="716" height="240" fill="white" />
+                            </clipPath>
+
+                            <clipPath id="clip1_243_198">
+                                <rect width="30" height="30" fill="white" transform="translate(9 166)" />
+                            </clipPath>
+
+                            <clipPath id="clip2_243_198">
+                                <rect width="20" height="20" fill="white" transform="translate(19 143)" />
+                            </clipPath>
+                        </defs>
+                    </svg>
+
+                    <svg class="pen" width="158" height="209" viewBox="0 0 158 209" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <mask id="mask0_245_163" style="mask-type: alpha" maskUnits="userSpaceOnUse" x="0" y="-6"
+                            width="215" height="215">
+                            <rect y="70.3893" width="157.565" height="157.565" transform="rotate(-29 0 70.3893)"
+                                fill="#D9D9D9" />
+                        </mask>
+
+                        <g mask="url(#mask0_245_163)" class="pen-body">
+                            <path
+                                d="M89.1852 163.574L97.3677 159.039L122.384 71.7972L109.666 68.1504L84.6496 155.392L89.1852 163.574ZM84.0668 181.424L70.5396 157.02L104.4 39.3545C104.965 37.6652 105.782 36.1489 106.852 34.8055C107.921 33.4621 109.222 32.366 110.753 31.5172C112.284 30.6684 113.927 30.1333 115.68 29.9118C117.434 29.6903 119.156 29.8619 120.845 30.4268L133.196 34.0893C134.928 34.5054 136.455 35.2854 137.777 36.4291C139.099 37.5729 140.158 38.8625 140.954 40.298C141.803 41.8292 142.349 43.4346 142.592 45.114C142.834 46.7934 142.7 48.5256 142.188 50.3106L108.471 167.897L84.0668 181.424ZM115.993 70.0854L109.666 68.1504L122.384 71.7972L115.993 70.0854Z"
+                                fill="#FDFDFE" />
+                        </g>
+
+                        <rect x="84" y="178" width="1" height="1" fill="white" />
+
+                        <rect x="88" y="166" width="1" height="1" fill="white" />
+
+                        <rect x="111" y="34" width="1" height="1" fill="white" />
+
+                        <rect x="137" y="43" width="1" height="1" fill="white" />
+                    </svg>
+
+                    <figcaption>Google Meet Scribble effect</figcaption>
+                </figure>
+            </div>
+        </canvas>
+    </main>
+    <script>
+        const canvas = document.getElementById("scribbleCanvas");
+        const ctx = canvas.getContext("2d");
+        const container = document.getElementById("scribble_container");
+
+        canvas.onpaint = (event) => {
+            ctx.reset();
+
+            // ADD A SOFT GLOW (Shadow)
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = "rgba(41, 142, 247, 0.5)"; // Blue glow
+            ctx.shadowOffsetX = 5;
+            ctx.shadowOffsetY = 5;
+
+            // The "Ghost" Trail (Red Channel Offset)
+            ctx.globalAlpha = 0.4;
+            ctx.filter = "brightness(1.5) sepia(1) hue-rotate(-50deg)"; // Shift color to red/pink
+            ctx.drawElementImage(container, 2, 2); // Slight offset
+
+            ctx.filter = "brightness(1.5) sepia(1) hue-rotate(150deg)"; // Shift color to cyan
+            ctx.drawElementImage(container, -2, -2); // Opposite offset
+
+            ctx.globalAlpha = 1.0;
+            ctx.filter = "none";
+            ctx.shadowBlur = 0;
+
+            // drawElementImage returns the matrix we need for DOM synchronization
+            let transform = ctx.drawElementImage(container, 0, 0);
+
+            container.style.transform = transform.toString();
+        };
+
+        function animate() {
+            canvas.requestPaint();
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+    </script>
+</body>
+
+</html>
