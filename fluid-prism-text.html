@@ -142,6 +142,20 @@
 
         const textSource = document.getElementById('text-source');
 
+        // High-DPI Support: Scale the source element to its physical rendering resolution
+        const updateDPI = () => {
+            const dpr = window.devicePixelRatio || 1;
+            // Map the layout width to the physical width for 1:1 pixel rendering
+            const targetWidth = canvas.width || (800 * dpr);
+            const baseFontSize = 34; // Slightly larger for better clarity
+            const basePadding = 48;
+
+            textSource.style.width = targetWidth + 'px';
+            textSource.style.fontSize = (baseFontSize * (targetWidth / 800)) + 'px';
+            textSource.style.padding = (basePadding * (targetWidth / 800)) + 'px';
+        };
+        updateDPI();
+
         // Shader Setup
         function createShader(gl, type, source) {
             const shader = gl.createShader(type);
@@ -207,20 +221,20 @@
         let targetHover = 0;
 
         window.addEventListener('mousemove', (e) => {
-            mouseX = e.clientX;
-            mouseY = e.clientY;
+            mouseX = e.pageX;
+            mouseY = e.pageY;
             targetHover = 1.0;
         });
 
         window.addEventListener('touchstart', (e) => {
-            mouseX = e.touches[0].clientX;
-            mouseY = e.touches[0].clientY;
+            mouseX = e.touches[0].pageX;
+            mouseY = e.touches[0].pageY;
             targetHover = 1.0;
         });
 
         window.addEventListener('touchmove', (e) => {
-            mouseX = e.touches[0].clientX;
-            mouseY = e.touches[0].clientY;
+            mouseX = e.touches[0].pageX;
+            mouseY = e.touches[0].pageY;
         });
 
         // Decay hover effect when not moving
@@ -238,6 +252,9 @@
             canvas.width = width;
             canvas.height = height;
             gl.viewport(0, 0, width, height);
+
+            // Recalculate DPI scaling on resize to ensure texture stays sharp
+            updateDPI();
         });
         resizeObserver.observe(canvas, { box: 'device-pixel-content-box' });
 
