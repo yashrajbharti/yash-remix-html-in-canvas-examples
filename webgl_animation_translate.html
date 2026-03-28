@@ -179,31 +179,16 @@
         <!-- The Pin (reused or one per label) -->
         <div class="pin" id="pin-element"></div>
 
-        <!-- Labels are defined here as children; JS will position them via getElementTransform -->
-        <div class="label" id="lbl-gate">
-            鳥居 Torii Gate
-            <span class="sub">Sacred Entrance</span>
-        </div>
-        <div class="label" id="lbl-blossom">
-            桜 Sakura Tree
-            <span class="sub">Cherry Blossom</span>
-        </div>
-        <div class="label" id="lbl-lantern">
-            灯篭 Stone Lantern
-            <span class="sub">Traditional Tōrō</span>
-        </div>
-        <div class="label" id="lbl-shrine">
-            神社 Main Shrine
-            <span class="sub">Principal Jinja</span>
-        </div>
-        <div class="label" id="lbl-pond">
-            鯉の池 Koi Pond
-            <span class="sub">Nishikigoi Habitat</span>
-        </div>
-        <div class="label" id="lbl-path">
-            庭の道 Garden Path
-            <span class="sub">Zen Walkway</span>
-        </div>
+        <!-- Authentic Tokyo Signs - Defaulting to Japanese (JP) -->
+        <div class="label" id="lbl-panda">興 <span class="sub">Panda Cafe</span></div>
+        <div class="label" id="lbl-fish">おいしい魚 <span class="sub">Seafood Place</span></div>
+        <div class="label" id="lbl-sushi">寿司 <span class="sub">Sushi Shop</span></div>
+        <div class="label" id="lbl-geisha">芸者 <span class="sub">Theme Restaurant</span></div>
+        <div class="label" id="lbl-barber">理容室 <span class="sub">Barbershop</span></div>
+        <div class="label" id="lbl-ocean">水族館 <span class="sub">Aquarium</span></div>
+        <div class="label" id="lbl-mountain">駅 <span class="sub">Train Station</span></div>
+        <div class="label" id="lbl-egg">卵料理 <span class="sub">Egg Dishes</span></div>
+        <div class="label" id="lbl-sushiking">寿司王 <span class="sub">Sushi King</span></div>
     </canvas>
 
     <script type="importmap">
@@ -282,68 +267,54 @@
         // The model is placed at position (1, 1, 0) with scale 0.01.
         // All world positions below are in Three.js world space.
         const LABELS = [
-            {
-                id: 'lbl-gate',
-                el: document.getElementById('lbl-gate'),
-                world: new THREE.Vector3(1.0, 1.8, 0.8),
-                px: 0, py: 0, offscreen: true, labelOccluded: true
-            },
-            {
-                id: 'lbl-blossom',
-                el: document.getElementById('lbl-blossom'),
-                world: new THREE.Vector3(2.5, 2.5, -1.5),
-                px: 0, py: 0, offscreen: true, labelOccluded: true
-            },
-            {
-                id: 'lbl-lantern',
-                el: document.getElementById('lbl-lantern'),
-                world: new THREE.Vector3(-1.0, 1.2, 2.0),
-                px: 0, py: 0, offscreen: true, labelOccluded: true
-            },
-            {
-                id: 'lbl-shrine',
-                el: document.getElementById('lbl-shrine'),
-                world: new THREE.Vector3(0.5, 2.5, -2.5),
-                px: 0, py: 0, offscreen: true, labelOccluded: true
-            },
-            {
-                id: 'lbl-pond',
-                el: document.getElementById('lbl-pond'),
-                world: new THREE.Vector3(3.0, 0.8, 1.5),
-                px: 0, py: 0, offscreen: true, labelOccluded: true
-            },
-            {
-                id: 'lbl-path',
-                el: document.getElementById('lbl-path'),
-                world: new THREE.Vector3(-2.0, 0.9, 0.0),
-                px: 0, py: 0, offscreen: true, labelOccluded: true
-            },
-        ];
+            { id: 'lbl-panda', world: new THREE.Vector3(1.5, 2.8, -1.0) },
+            { id: 'lbl-fish', world: new THREE.Vector3(1.1, 1.8, 0.8) },
+            { id: 'lbl-sushi', world: new THREE.Vector3(2.0, 0.8, 2.5) },
+            { id: 'lbl-geisha', world: new THREE.Vector3(-1.8, 1.2, 1.0) },
+            { id: 'lbl-barber', world: new THREE.Vector3(-1.0, 3.2, 0.0) },
+            { id: 'lbl-ocean', world: new THREE.Vector3(0.5, 2.2, -1.5) },
+            { id: 'lbl-mountain', world: new THREE.Vector3(1.5, 1.5, -3.0) },
+            { id: 'lbl-egg', world: new THREE.Vector3(1.0, 2.5, 1.2) },
+            { id: 'lbl-sushiking', world: new THREE.Vector3(-0.5, 2.0, -2.0) },
+        ].map(l => ({
+            ...l,
+            el: document.getElementById(l.id),
+            px: 0, py: 0, offscreen: true, labelOccluded: true
+        }));
 
         const TRANSLATIONS = {
             en: {
-                'lbl-gate': { main: 'Torii Gate', sub: 'Sacred Entrance' },
-                'lbl-blossom': { main: 'Sakura Tree', sub: 'Cherry Blossom' },
-                'lbl-lantern': { main: 'Stone Lantern', sub: 'Traditional Tōrō' },
-                'lbl-shrine': { main: 'Main Shrine', sub: 'Principal Jinja' },
-                'lbl-pond': { main: 'Koi Pond', sub: 'Nishikigoi Habitat' },
-                'lbl-path': { main: 'Garden Path', sub: 'Zen Walkway' }
+                'lbl-panda': { main: 'Prosperity Cafe', sub: 'Exciting Desserts' },
+                'lbl-fish': { main: 'Seafood Restaurant', sub: 'Delicious Fish' },
+                'lbl-sushi': { main: 'Sushi Shop', sub: 'Authentic Sushi' },
+                'lbl-geisha': { main: 'Themed Bar', sub: 'Geisha Culture' },
+                'lbl-barber': { main: 'Barbershop', sub: 'Local Services' },
+                'lbl-ocean': { main: 'Aquarium', sub: 'Maritime Life' },
+                'lbl-mountain': { main: 'Train Station', sub: 'Local Transit' },
+                'lbl-egg': { main: 'Egg Cafe', sub: 'Breakfast Specialty' },
+                'lbl-sushiking': { main: 'Sushi King', sub: 'Premium Rolls' }
             },
             jp: {
-                'lbl-gate': { main: '鳥居', sub: 'Torii Gate' },
-                'lbl-blossom': { main: '桜', sub: 'Sakura Tree' },
-                'lbl-lantern': { main: '灯篭', sub: 'Stone Lantern' },
-                'lbl-shrine': { main: '神社', sub: 'Main Shrine' },
-                'lbl-pond': { main: '鯉の池', sub: 'Koi Pond' },
-                'lbl-path': { main: '庭の道', sub: 'Garden Path' }
+                'lbl-panda': { main: '興', sub: 'Panda Cafe' },
+                'lbl-fish': { main: 'おいしい魚', sub: 'Seafood Place' },
+                'lbl-sushi': { main: '寿司', sub: 'Sushi Shop' },
+                'lbl-geisha': { main: '芸者', sub: 'Theme Restaurant' },
+                'lbl-barber': { main: '理容室', sub: 'Barbershop' },
+                'lbl-ocean': { main: '水族館', sub: 'Aquarium' },
+                'lbl-mountain': { main: '駅', sub: 'Train Station' },
+                'lbl-egg': { main: '卵料理', sub: 'Egg Dishes' },
+                'lbl-sushiking': { main: '寿司王', sub: 'Sushi King' }
             },
             es: {
-                'lbl-gate': { main: 'Puerta Torii', sub: 'Entrada Sagrada' },
-                'lbl-blossom': { main: 'Cerezo', sub: 'Flor de Sakura' },
-                'lbl-lantern': { main: 'Linterna', sub: 'Linterna de Piedra' },
-                'lbl-shrine': { main: 'Santuario', sub: 'Edificio Principal' },
-                'lbl-pond': { main: 'Estanque Koi', sub: 'Hábitat de Peces' },
-                'lbl-path': { main: 'Sendero', sub: 'Camino del Jardín' }
+                'lbl-panda': { main: 'Café Prosperidad', sub: 'Postres Panda' },
+                'lbl-fish': { main: 'Pescado Delicioso', sub: 'Restaurante Marino' },
+                'lbl-sushi': { main: 'Tienda de Sushi', sub: 'Rollos Frescos' },
+                'lbl-geisha': { main: 'Bar Temático', sub: 'Cultura Geisha' },
+                'lbl-barber': { main: 'Barbería', sub: 'Servicios Locales' },
+                'lbl-ocean': { main: 'Acuario', sub: 'Vida Marina' },
+                'lbl-mountain': { main: 'Estación de Tren', sub: 'Tránsito Local' },
+                'lbl-egg': { main: 'Café de Huevos', sub: 'Especial de Desayuno' },
+                'lbl-sushiking': { main: 'Rey del Sushi', sub: 'Rollos Premium' }
             }
         };
 
@@ -353,8 +324,8 @@
             const data = TRANSLATIONS[lang];
             LABELS.forEach(lbl => {
                 const trans = data[lbl.id];
-                lbl.el.childNodes[0].textContent = trans.main + ' ';
-                lbl.el.querySelector('.sub').textContent = trans.sub;
+                // Update elements with a clean innerHTML or append logic
+                lbl.el.innerHTML = `${trans.main} <span class="sub">${trans.sub}</span>`;
             });
             labelCanvas.requestPaint();
         });
