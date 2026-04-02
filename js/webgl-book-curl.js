@@ -290,7 +290,7 @@ export function setupCurlBookRendering(canvas, numTotalPages = 6) {
             // Only interpolate if not being manually dragged
             const activeDraggingThisPage = isDragging && dragPage === p;
             if (!activeDraggingThisPage && p.progress !== p.targetProgress) {
-                const speed = 1.2;
+                const speed = 5;
                 if (p.progress < p.targetProgress) p.progress = Math.min(p.targetProgress, p.progress + speed * dt);
                 else p.progress = Math.max(p.targetProgress, p.progress - speed * dt);
             }
