@@ -288,6 +288,10 @@ function initUI() {
         pad.className = 'pad';
         pad.dataset.key = config.key;
         pad.dataset.index = index.toString();
+        
+        // Add Material Design ripple for tactile feedback
+        const ripple = document.createElement('md-ripple');
+        pad.appendChild(ripple);
 
         const padText = document.createElement('div');
         padText.className = 'pad-text';
