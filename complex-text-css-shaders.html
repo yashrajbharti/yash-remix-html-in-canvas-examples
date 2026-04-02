@@ -292,10 +292,14 @@
 
     // Track resizing boundaries
     const observer = new ResizeObserver(([entry]) => {
-      canvas.width = entry.devicePixelContentBoxSize[0].inlineSize;
-      canvas.height = entry.devicePixelContentBoxSize[0].blockSize;
+      const width = entry.devicePixelContentBoxSize[0].inlineSize;
+      const height = entry.devicePixelContentBoxSize[0].blockSize;
+      if (canvas.width !== width || canvas.height !== height) {
+        canvas.width = width;
+        canvas.height = height;
+      }
     });
-    observer.observe(canvas, { box: 'device-pixel-content-box', fireOnEveryPaint: true });
+    observer.observe(canvas, { box: 'device-pixel-content-box' });
 
     // Exclusively render on browser paint pipeline!
     canvas.onpaint = () => {
@@ -312,7 +316,11 @@
 
         let transform = ctx.drawElementImage(drawElement, 0, 0);
         if (transform) {
-          drawElement.style.transform = transform.toString();
+          const transformStr = transform.toString();
+          if (transformStr !== drawElement.dataset.lastTransform) {
+            drawElement.style.transform = transformStr;
+            drawElement.dataset.lastTransform = transformStr;
+          }
         }
       } catch (e) {
         console.warn("Skipping cached frame");

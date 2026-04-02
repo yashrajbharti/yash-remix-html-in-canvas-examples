@@ -284,16 +284,20 @@
             gl.drawArrays(gl.TRIANGLES, 0, 6);
 
             // Synchronize selection/hit-testing
-            // Current draw transform: Full-screen quad (0,0 to canvas.width, canvas.height)
             const sx = canvas.clientWidth / textSource.offsetWidth;
             const sy = canvas.clientHeight / textSource.offsetHeight;
             const drawTransform = new DOMMatrix().scale(sx, sy);
 
+            // Deduplicate style updates to prevent redundant onpaint triggers
             try {
                 const syncTransform = canvas.getElementTransform(textSource, drawTransform);
-                textSource.style.transform = syncTransform.toString();
+                const transformStr = syncTransform.toString();
+                if (transformStr !== textSource.dataset.lastTransform) {
+                    textSource.style.transform = transformStr;
+                    textSource.dataset.lastTransform = transformStr;
+                }
             } catch (e) {
-                // Ignore if not ready
+                // Ignore if not fully initialized
             }
 
             requestAnimationFrame(render);
