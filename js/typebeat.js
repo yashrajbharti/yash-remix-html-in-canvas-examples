@@ -660,10 +660,10 @@ function setupEventListeners() {
                 Tone.Transport.stop();
                 currentStep = 0;
                 updatePlayhead(-1);
-                playBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-play"><polygon points="5 3 19 12 5 21 5 3"/></svg>`;
+                playBtn.selected = false;
             } else {
                 Tone.Transport.start();
-                playBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pause"><rect x="14" y="4" width="4" height="16" rx="1"/><rect x="6" y="4" width="4" height="16" rx="1"/></svg>`;
+                playBtn.selected = true;
             }
             isPlaying = !isPlaying;
         });
@@ -687,44 +687,23 @@ function setupEventListeners() {
         });
     }
 
-    const bpmMinus = document.getElementById('bpm-minus');
-    if (bpmMinus) {
-        bpmMinus.addEventListener('click', () => {
-             const currentBpm = Tone.Transport.bpm.value;
-             const newBpm = Math.max(20, currentBpm - 5);
-             Tone.Transport.bpm.value = newBpm;
-             const bpmVal = document.getElementById('bpm-val');
-             if (bpmVal) bpmVal.value = Math.round(newBpm).toString();
-        });
+    const bpmSlider = document.getElementById('bpm-slider');
+    const updateBPM = (newBPM) => {
+        const val = Math.max(20, Math.min(300, Math.round(newBPM)));
+        Tone.Transport.bpm.value = val;
+        if (bpmSlider) bpmSlider.value = val;
+    };
+
+    if (bpmSlider) {
+        bpmSlider.addEventListener('input', () => updateBPM(bpmSlider.value));
     }
 
-    const bpmPlus = document.getElementById('bpm-plus');
-    if (bpmPlus) {
-        bpmPlus.addEventListener('click', () => {
-             const currentBpm = Tone.Transport.bpm.value;
-             const newBpm = Math.min(300, currentBpm + 5);
-             Tone.Transport.bpm.value = newBpm;
-             const bpmVal = document.getElementById('bpm-val');
-             if (bpmVal) bpmVal.value = Math.round(newBpm).toString();
-        });
-    }
+    window.addEventListener('keydown', (e) => {
+        if (e.key === '[') updateBPM(Tone.Transport.bpm.value - 1);
+        if (e.key === ']') updateBPM(Tone.Transport.bpm.value + 1);
+    });
 
-    const bpmInput = document.getElementById('bpm-val');
-    if (bpmInput) {
-        bpmInput.addEventListener('change', () => {
-             const value = parseInt(bpmInput.value);
-             if (!isNaN(value) && value >= 20 && value <= 300) {
-                  Tone.Transport.bpm.value = value;
-             } else {
-                  bpmInput.value = Math.round(Tone.Transport.bpm.value).toString();
-             }
-        });
-        bpmInput.addEventListener('keydown', (e) => {
-             if (e.key === 'Enter') {
-                  bpmInput.blur();
-             }
-        });
-    }
+    // BPM input handling removed in favor of slider
 
     window.addEventListener('keydown', async (e) => {
         if (document.activeElement && document.activeElement.tagName === 'INPUT') return;
