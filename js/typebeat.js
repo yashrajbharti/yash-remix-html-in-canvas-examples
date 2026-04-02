@@ -26,16 +26,51 @@ let drawMode = null;
 let activePadIndex = null;
 let justClicked = false;
 
-// Pre-populate with a basic 4/4 house beat
-sequencerState[0][0] = 'X'; // Kick
-sequencerState[0][10] = 'X';
-sequencerState[0][13] = 'X';
-sequencerState[1][4] = 'X'; // Snare
-sequencerState[1][12] = 'X';
-for (let i = 0; i < 14; i += 2) {
-    sequencerState[2][i] = 'X'; // Closed Hat
+function updateBPM(newBPM) {
+    const bpmSlider = document.getElementById('bpm-slider');
+    const val = Math.max(20, Math.min(300, Math.round(newBPM)));
+    Tone.Transport.bpm.value = val;
+    if (bpmSlider) bpmSlider.value = val;
 }
-sequencerState[3][14] = 'X'; // open hat
+
+function applyDefaultBeat() {
+    updateBPM(120);
+    for (let r = 0; r < ROWS; r++) {
+        for (let s = 0; s < STEPS; s++) {
+            sequencerState[r][s] = '-';
+        }
+    }
+    sequencerState[0][0] = 'X'; // Kick
+    sequencerState[0][4] = 'X'; 
+    sequencerState[0][8] = 'X'; 
+    sequencerState[0][12] = 'X'; 
+    sequencerState[1][4] = 'X'; // Snare
+    sequencerState[1][12] = 'X';
+    for (let i = 0; i < 16; i += 2) {
+        sequencerState[2][i] = 'X'; // Closed Hat
+    }
+    sequencerState[3][14] = 'X'; // Open Hat
+    const rows = document.querySelectorAll('.seq-row');
+    if (rows.length > 0) {
+        rows.forEach((row, r) => {
+            const steps = row.querySelectorAll('.step');
+            const hue = Math.round(190 - (150 * r) / 11);
+            steps.forEach((step, s) => {
+                const val = sequencerState[r][s];
+                step.textContent = val;
+                if (val === 'X') {
+                    step.classList.add('active');
+                    step.classList.remove('inactive');
+                    step.style.color = `hsl(${hue}, 100%, 55%)`;
+                } else {
+                    step.classList.remove('active');
+                    step.classList.add('inactive');
+                    step.style.color = '';
+                }
+            });
+        });
+    }
+}
 
 let currentStep = 0;
 let isPlaying = false;
@@ -672,28 +707,11 @@ function setupEventListeners() {
     const clearBtn = document.getElementById('clear-btn');
     if (clearBtn) {
         clearBtn.addEventListener('click', () => {
-            for (let r = 0; r < ROWS; r++) {
-                for (let s = 0; s < STEPS; s++) {
-                    sequencerState[r][s] = '-';
-                }
-            }
-            const steps = document.querySelectorAll('.step');
-            steps.forEach(s => {
-                s.textContent = '-';
-                s.classList.remove('active');
-                s.classList.add('inactive');
-                s.style.color = ''; 
-            });
+            applyDefaultBeat();
         });
     }
 
     const bpmSlider = document.getElementById('bpm-slider');
-    const updateBPM = (newBPM) => {
-        const val = Math.max(20, Math.min(300, Math.round(newBPM)));
-        Tone.Transport.bpm.value = val;
-        if (bpmSlider) bpmSlider.value = val;
-    };
-
     if (bpmSlider) {
         bpmSlider.addEventListener('input', () => updateBPM(bpmSlider.value));
     }
@@ -782,6 +800,7 @@ window.addEventListener('DOMContentLoaded', () => {
     initUI();
     setupSequencer();
     setupEventListeners();
+    applyDefaultBeat(); // Set the default pattern initially
     loadFromUrl();
     updatePhysics();
     setupCanvasRedraw();
