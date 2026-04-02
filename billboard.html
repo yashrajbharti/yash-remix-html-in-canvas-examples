@@ -583,38 +583,35 @@
             }
 
             // 2. Interactivity Synchronization
-            if (canvas.getElementTransform && screenMesh && billboardBounds) {
-                const threeToDOMMatrix = (m) => {
-                    const e = m.elements;
-                    const dom = new DOMMatrix();
-                    // Explicitly map Three.js Column-Major to DOMMatrix Row-Major
-                    dom.m11 = e[0]; dom.m12 = e[4]; dom.m13 = e[8]; dom.m14 = e[12];
-                    dom.m21 = e[1]; dom.m22 = e[5]; dom.m23 = e[9]; dom.m24 = e[13];
-                    dom.m31 = e[2]; dom.m32 = e[6]; dom.m33 = e[10]; dom.m34 = e[14];
-                    dom.m41 = e[3]; dom.m42 = e[7]; dom.m43 = e[11]; dom.m44 = e[15];
-                    return dom;
-                };
-
+            if (canvas.getElementTransform && screenMesh) {
+                // Ensure camera and screen matrices are fresh before projection
+                camera.updateMatrixWorld();
+                camera.matrixWorldInverse.copy(camera.matrixWorld).invert();
                 screenMesh.updateMatrixWorld();
 
-                // Get the latest bounds (in case the user modified them)
-                screenMesh.geometry.computeBoundingBox();
+                const viewportW = canvas.width;
+                const viewportH = canvas.height;
+
+                // Convert Three.js matrices (column-major) to DOMMatrix
+                const toDOM = (m) => new DOMMatrix(m.elements);
+
+                // Precise geometry bounds
                 const box = screenMesh.geometry.boundingBox;
                 const width = box.max.x - box.min.x;
                 const height = box.max.y - box.min.y;
 
-                // Map 1024x576 element to Three.js mesh local bounds
-                // Element (0,0) -> Mesh (minX, maxY) because Y is up in 3D
+                // Local mapping: DOM (0,0) -> Mesh (min.x, max.y)
                 const localTransform = new DOMMatrix()
                     .translate(box.min.x, box.max.y, 0)
                     .scale(width / 1024, -height / 576, 1);
 
+                // Viewport * Projection * View * Model * Local
                 const mvp = new DOMMatrix()
-                    .translate(window.innerWidth / 2, window.innerHeight / 2)
-                    .scale(window.innerWidth / 2, -window.innerHeight / 2, 1)
-                    .multiply(threeToDOMMatrix(camera.projectionMatrix))
-                    .multiply(threeToDOMMatrix(camera.matrixWorldInverse))
-                    .multiply(threeToDOMMatrix(screenMesh.matrixWorld))
+                    .translate(viewportW / 2, viewportH / 2)
+                    .scale(viewportW / 2, -viewportH / 2, 1)
+                    .multiply(toDOM(camera.projectionMatrix))
+                    .multiply(toDOM(camera.matrixWorldInverse))
+                    .multiply(toDOM(screenMesh.matrixWorld))
                     .multiply(localTransform);
 
                 const syncT = canvas.getElementTransform(billboardContent, mvp);
