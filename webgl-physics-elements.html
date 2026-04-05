@@ -132,21 +132,21 @@
     <div class="hint">Click or Tab through the falling objects!</div>
 
     <canvas id="gl-canvas" layoutsubtree>
-        <md-filled-button class="physics-item">Once</md-filled-button>
-        <md-filled-button class="physics-item">Upon</md-filled-button>
-        <md-filled-button class="physics-item">A</md-filled-button>
-        <md-filled-button class="physics-item">Time</md-filled-button>
-        <md-filled-button class="physics-item">There</md-filled-button>
-        <md-filled-button class="physics-item">Was</md-filled-button>
-        <md-filled-button class="physics-item">HTML-in-Canvas</md-filled-button>
-        <md-filled-button class="physics-item">It</md-filled-button>
-        <md-filled-button class="physics-item">Was</md-filled-button>
-        <md-filled-button class="physics-item">Accessible</md-filled-button>
-        <md-filled-button class="physics-item">Interactive</md-filled-button>
-        <md-filled-button class="physics-item">And</md-filled-button>
-        <md-filled-button class="physics-item">Felt</md-filled-button>
-        <md-filled-button class="physics-item">Like</md-filled-button>
-        <md-filled-button class="physics-item">Magic 🪄</md-filled-button>
+        <md-filled-tonal-button class="physics-item">Once</md-filled-tonal-button>
+        <md-filled-tonal-button class="physics-item">Upon</md-filled-tonal-button>
+        <md-filled-tonal-button class="physics-item">A</md-filled-tonal-button>
+        <md-filled-tonal-button class="physics-item">Time</md-filled-tonal-button>
+        <md-filled-tonal-button class="physics-item">There</md-filled-tonal-button>
+        <md-filled-tonal-button class="physics-item">Was</md-filled-tonal-button>
+        <md-filled-tonal-button class="physics-item">HTML-in-Canvas</md-filled-tonal-button>
+        <md-filled-tonal-button class="physics-item">It</md-filled-tonal-button>
+        <md-filled-tonal-button class="physics-item">Was</md-filled-tonal-button>
+        <md-filled-tonal-button class="physics-item">Accessible</md-filled-tonal-button>
+        <md-filled-tonal-button class="physics-item">Interactive</md-filled-tonal-button>
+        <md-filled-tonal-button class="physics-item">And</md-filled-tonal-button>
+        <md-filled-tonal-button class="physics-item">Felt</md-filled-tonal-button>
+        <md-filled-tonal-button class="physics-item">Like</md-filled-tonal-button>
+        <md-filled-tonal-button class="physics-item">Magic 🪄</md-filled-tonal-button>
     </canvas>
 
     <script src="js/gl-matrix.js"></script>
@@ -164,8 +164,9 @@
         let phraseIndex = 0;
         let numberCounter = 1;
 
+        // JavaScript creating tonal buttons
         document.getElementById('btn-add').addEventListener('click', () => {
-            const newEl = document.createElement('md-filled-button');
+            const newEl = document.createElement('md-filled-tonal-button');
             newEl.className = 'physics-item';
 
             if (phraseIndex < phrases.length) {

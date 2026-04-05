@@ -26,10 +26,19 @@ export function setupPhysicsRendering(canvas, containerId) {
     precision highp float;
     in vec2 vTexCoord;
     uniform sampler2D uTex;
+    uniform float uHueOffset;
     out vec4 fragColor;
+    
+    vec3 hueRotate(vec3 color, float hueAdjust) {
+        const vec3 k = vec3(0.57735, 0.57735, 0.57735);
+        float cosAngle = cos(hueAdjust);
+        return color * cosAngle + cross(k, color) * sin(hueAdjust) + k * dot(k, color) * (1.0 - cosAngle);
+    }
+
     void main() {
         vec4 color = texture(uTex, vTexCoord);
         if (color.a < 0.1) discard;
+        color.rgb = hueRotate(color.rgb, uHueOffset);
         fragColor = color;
     }`;
 
@@ -48,6 +57,7 @@ export function setupPhysicsRendering(canvas, containerId) {
     const uProj = gl.getUniformLocation(program, 'uProjection');
     const uView = gl.getUniformLocation(program, 'uView');
     const uModel = gl.getUniformLocation(program, 'uModel');
+    const uHue = gl.getUniformLocation(program, 'uHueOffset');
 
     // --- GEOMETRY (A simple unit plane) ---
     const vao = gl.createVertexArray();
@@ -66,6 +76,9 @@ export function setupPhysicsRendering(canvas, containerId) {
 class PhysicsElement {
     constructor(domElement) {
         this.domEl = domElement;
+        
+        // Use a random hue offset for the WebGL shader instead of CSS filter
+        this.hueOffset = Math.random() * Math.PI * 2;
 
         this.tex = gl.createTexture();
         gl.bindTexture(gl.TEXTURE_2D, this.tex);
@@ -126,6 +139,11 @@ class PhysicsElement {
         this.vx *= drag;
         this.vy *= drag;
         this.rotV[2] *= angularDrag;
+
+        // Righting torque: encourages landing on the flat/width edges (nearest multiple of PI)
+        const targetAngle = Math.round(this.rot[2] / Math.PI) * Math.PI;
+        const angleDiff = targetAngle - this.rot[2];
+        this.rotV[2] += angleDiff * 8.0 * dt;
 
         this.x += this.vx * dt;
         this.y += this.vy * dt;
@@ -317,6 +335,7 @@ function resolveCollisions(elements) {
         for (const p of elements) {
             const model = p.getMatrix();
             gl.uniformMatrix4fv(uModel, false, model);
+            gl.uniform1f(uHue, p.hueOffset);
             
             gl.bindTexture(gl.TEXTURE_2D, p.tex);
             gl.bindVertexArray(vao);
