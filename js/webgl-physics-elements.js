@@ -241,7 +241,7 @@ class PhysicsElement {
             this.y += overlap;
 
             if (this.vy < 0) {
-                this.vy *= -0.4;
+                this.vy *= -0.6; // Increased from -0.4 to match inter-element bounce
             }
 
             this.vx *= 0.98;
@@ -356,8 +356,8 @@ function testOBBCollision(a, b) {
 }
 
 function resolveCollisions(elements) {
-    const restitution = 0.4;
-    const friction = 0.2;
+    const restitution = 0.6; // Increased to 0.6 to match the "feel" of the floor reflection
+    const friction = 0.1;   // Reduced friction to allow more fluid sliding/bouncing
 
     for (let iter = 0; iter < 12; iter++) {
         for (let i = 0; i < elements.length; i++) {
