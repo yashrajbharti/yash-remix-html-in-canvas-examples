@@ -298,6 +298,14 @@ export function setupCurlBookRendering(canvas, numTotalPages = 6) {
             updatePageTextureFromDOM(gl, p.backTex, p.backId);
         }
 
+        // Update UI button states
+        const canNext = pages.some(p => p.targetProgress === 0.0);
+        const canPrev = pages.some(p => p.targetProgress === 1.0);
+        const nextBtn = document.getElementById('next-btn');
+        const prevBtn = document.getElementById('prev-btn');
+        if (nextBtn) nextBtn.disabled = !canNext;
+        if (prevBtn) prevBtn.disabled = !canPrev;
+
         gl.clearColor(0, 0, 0, 0);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         gl.enable(gl.DEPTH_TEST);
