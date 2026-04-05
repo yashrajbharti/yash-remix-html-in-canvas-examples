@@ -107,6 +107,7 @@ class PhysicsElement {
 
         this.domEl.addEventListener('mousedown', (e) => {
             if (!this.active) return;
+            if (this.isDragging) return;
             this.isDragging = true;
             lastMouse = { x: e.clientX, y: e.clientY };
             originalInvMass = this.invMass;
@@ -114,36 +115,37 @@ class PhysicsElement {
             this.vx = 0;
             this.vy = 0;
             this.rotV = [0, 0, 0];
+            
+            const onMouseMove = (ev) => {
+                if (!this.isDragging) return;
+                const dx = ev.clientX - lastMouse.x;
+                const dy = ev.clientY - lastMouse.y;
+                
+                // Map Screen Pixels to WebGL Coordinates approximately (Z=0)
+                const scale = 12.5 / window.innerHeight;
+                const glDx = dx * scale;
+                const glDy = -dy * scale; // Invert Y
+                
+                this.x += glDx;
+                this.y += glDy;
+                
+                // Generate momentary throw velocity for realistic release momentum
+                this.vx = glDx / 0.016; // approx 60fps delta
+                this.vy = glDy / 0.016;
+                
+                lastMouse = { x: ev.clientX, y: ev.clientY };
+            };
+            
+            const onMouseUp = () => {
+                this.isDragging = false;
+                this.invMass = originalInvMass;
+                window.removeEventListener('mousemove', onMouseMove);
+                window.removeEventListener('mouseup', onMouseUp);
+            };
+            
+            window.addEventListener('mousemove', onMouseMove);
+            window.addEventListener('mouseup', onMouseUp);
         });
-
-        this.domEl.addEventListener('mousemove', (e) => {
-            if (!this.isDragging) return;
-            const dx = e.clientX - lastMouse.x;
-            const dy = e.clientY - lastMouse.y;
-            
-            // Map Screen Pixels to WebGL Coordinates approximately (Z=0)
-            const scale = 12.5 / window.innerHeight;
-            const glDx = dx * scale;
-            const glDy = -dy * scale; // Invert Y
-            
-            this.x += glDx;
-            this.y += glDy;
-            
-            // Generate momentary throw velocity for realistic release momentum
-            this.vx = glDx / 0.016; // approx 60fps delta
-            this.vy = glDy / 0.016;
-            
-            lastMouse = { x: e.clientX, y: e.clientY };
-        });
-
-        const releaseDrag = (e) => {
-            if (!this.isDragging) return;
-            this.isDragging = false;
-            this.invMass = originalInvMass;
-        };
-
-        this.domEl.addEventListener('mouseup', releaseDrag);
-        this.domEl.addEventListener('mouseleave', releaseDrag);
     }
 
     updateSize() {
@@ -381,6 +383,8 @@ function resolveCollisions(elements) {
         gl.uniformMatrix4fv(uProj, false, projection);
         gl.uniformMatrix4fv(uView, false, view);
 
+        // Hit-testing layout projection MUST perfectly match the canvas backing-buffer resolution.
+        // The getElementTransform API internally translates this matrix down to CSS layout space using internal canvas dimensions!
         const toCSSViewport = new DOMMatrix()
             .translate(canvas.width / 2, canvas.height / 2)
             .scale(canvas.width / 2, -canvas.height / 2, 1);
@@ -433,8 +437,9 @@ function resolveCollisions(elements) {
     }
 
     window.addEventListener('resize', () => {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = window.innerWidth * dpr;
+        canvas.height = window.innerHeight * dpr;
         gl.viewport(0, 0, canvas.width, canvas.height);
     });
     window.dispatchEvent(new Event('resize'));
