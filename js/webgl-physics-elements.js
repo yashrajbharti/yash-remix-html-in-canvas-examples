@@ -159,6 +159,24 @@ class PhysicsElement {
         this.invMass = 1 / this.mass;
     }
 
+    getVertices() {
+        const w = this.width * 0.5;
+        const h = this.height * 0.5;
+        const cos = Math.cos(this.rot[2]);
+        const sin = Math.sin(this.rot[2]);
+
+        const corners = [
+            [-w, -h], [w, -h], [w, h], [-w, h]
+        ];
+
+        return corners.map(([x, y]) => {
+            return {
+                x: this.x + (x * cos - y * sin),
+                y: this.y + (x * sin + y * cos)
+            };
+        });
+    }
+
     reset() {
         this.updateSize();
 
@@ -209,11 +227,18 @@ class PhysicsElement {
         this.x += this.vx * dt;
         this.y += this.vy * dt;
 
-        const floor = -5;
+        const verts = this.getVertices();
+        let lowestY = Infinity;
+        for (const v of verts) {
+            if (v.y < lowestY) lowestY = v.y;
+        }
 
-        // ✅ stable floor collision
-        if (this.y - this.radius < floor) {
-            this.y = floor + this.radius;
+        const floor = -5; // Consistent floor level
+
+        // ✅ Stable vertex-based floor collision
+        if (lowestY < floor) {
+            const overlap = floor - lowestY;
+            this.y += overlap;
 
             if (this.vy < 0) {
                 this.vy *= -0.4;
@@ -221,22 +246,32 @@ class PhysicsElement {
 
             this.vx *= 0.98;
             this.rotV[2] *= 0.8;
+            
+            // Re-calc lowestY after adjustment for sleep logic
+            lowestY = floor;
         }
 
-        const wall = 6.5;
-        if (Math.abs(this.x) + this.radius > wall) {
-            this.x = Math.sign(this.x) * (wall - this.radius);
-            this.vx *= -0.6;
+        const wallLimit = 6.5;
+        // Check each vertex for wall collision
+        for (const v of verts) {
+            if (v.x > wallLimit) {
+                this.x -= (v.x - wallLimit);
+                this.vx *= -0.5;
+            }
+            if (v.x < -wallLimit) {
+                this.x += (-wallLimit - v.x);
+                this.vx *= -0.5;
+            }
         }
 
         // ✅ sleep logic
         if (Math.abs(this.vx) < 0.01) this.vx = 0;
-        if (Math.abs(this.vy) < 0.01 && Math.abs(this.y - (floor + this.radius)) < 0.01) {
+        if (Math.abs(this.vy) < 0.01 && Math.abs(lowestY - floor) < 0.01) {
             this.vy = 0;
         }
 
         // ✅ kill unwanted spin at rest
-        if (Math.abs(this.vy) < 0.05 && Math.abs(this.y - (floor + this.radius)) < 0.01) {
+        if (Math.abs(this.vy) < 0.05 && Math.abs(lowestY - floor) < 0.01) {
             this.rotV[2] *= 0.7;
             if (Math.abs(this.rotV[2]) < 0.01) this.rotV[2] = 0;
         }
@@ -260,6 +295,66 @@ class PhysicsElement {
     }
 }
 
+function testOBBCollision(a, b) {
+    const vertsA = a.getVertices();
+    const vertsB = b.getVertices();
+
+    // Axes from A for SAT
+    const axes = [];
+    for (let i = 0; i < 2; i++) {
+        const p1 = vertsA[i];
+        const p2 = vertsA[(i + 1) % 4];
+        const dx = p2.x - p1.x;
+        const dy = p2.y - p1.y;
+        const len = Math.sqrt(dx * dx + dy * dy);
+        axes.push({ x: -dy / len, y: dx / len });
+    }
+    // Axes from B for SAT
+    for (let i = 0; i < 2; i++) {
+        const p1 = vertsB[i];
+        const p2 = vertsB[(i + 1) % 4];
+        const dx = p2.x - p1.x;
+        const dy = p2.y - p1.y;
+        const len = Math.sqrt(dx * dx + dy * dy);
+        axes.push({ x: -dy / len, y: dx / len });
+    }
+
+    let minOverlap = Infinity;
+    let collisionNormal = null;
+
+    for (const axis of axes) {
+        let minA = Infinity, maxA = -Infinity;
+        for (const v of vertsA) {
+            const proj = v.x * axis.x + v.y * axis.y;
+            minA = Math.min(minA, proj);
+            maxA = Math.max(maxA, proj);
+        }
+        let minB = Infinity, maxB = -Infinity;
+        for (const v of vertsB) {
+            const proj = v.x * axis.x + v.y * axis.y;
+            minB = Math.min(minB, proj);
+            maxB = Math.max(maxB, proj);
+        }
+
+        const overlap = Math.min(maxA, maxB) - Math.max(minA, minB);
+        if (overlap < 0) return null; // Gap found, no collision
+
+        if (overlap < minOverlap) {
+            minOverlap = overlap;
+            collisionNormal = axis;
+        }
+    }
+
+    // Ensure normal points from A to B
+    const aToB = { x: b.x - a.x, y: b.y - a.y };
+    if (aToB.x * collisionNormal.x + aToB.y * collisionNormal.y < 0) {
+        collisionNormal.x *= -1;
+        collisionNormal.y *= -1;
+    }
+
+    return { overlap: minOverlap, normal: collisionNormal };
+}
+
 function resolveCollisions(elements) {
     const restitution = 0.4;
     const friction = 0.2;
@@ -271,22 +366,16 @@ function resolveCollisions(elements) {
                 const a = elements[i];
                 const b = elements[j];
 
-                const dx = b.x - a.x;
-                const dy = b.y - a.y;
+                const collision = testOBBCollision(a, b);
 
-                const dist = Math.sqrt(dx * dx + dy * dy);
-                const minDist = a.radius + b.radius;
-
-                if (dist < minDist && dist > 0.0001) {
-
-                    const nx = dx / dist;
-                    const ny = dy / dist;
-
-                    const overlap = minDist - dist;
+                if (collision) {
+                    const nx = collision.normal.x;
+                    const ny = collision.normal.y;
+                    const overlap = collision.overlap;
 
                     // 🔥 REAL FIX: slop + bias + mass correction
                     const percent = 1.0; // Pushes 100% out of intersection
-                    const slop = 0.005; // tighter tolerance
+                    const slop = 0.001; // tighter tolerance for OBB
 
                     const correctionMag = Math.max(overlap - slop, 0) * percent;
 
@@ -294,12 +383,12 @@ function resolveCollisions(elements) {
                     let correctionY = correctionMag * ny;
 
                     // clamp (prevents explosions)
-                    const maxCorrection = 0.6; // increased cap allowing faster overlap resolution
+                    const maxCorrection = 0.6; 
                     correctionX = Math.max(-maxCorrection, Math.min(maxCorrection, correctionX));
                     correctionY = Math.max(-maxCorrection, Math.min(maxCorrection, correctionY));
 
                     const invMassSum = a.invMass + b.invMass;
-                    if (invMassSum === 0) continue; // Prevent explosion if both are being dragged
+                    if (invMassSum === 0) continue; 
 
                     a.x -= correctionX * (a.invMass / invMassSum);
                     a.y -= correctionY * (a.invMass / invMassSum);
