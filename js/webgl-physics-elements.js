@@ -99,14 +99,59 @@ class PhysicsElement {
         this.rotV = [0, 0, 0];
 
         this.updateSize();
+
+        // --- Drag Interaction ---
+        this.isDragging = false;
+        let lastMouse = null;
+        let originalInvMass = this.invMass;
+
+        this.domEl.addEventListener('mousedown', (e) => {
+            if (!this.active) return;
+            this.isDragging = true;
+            lastMouse = { x: e.clientX, y: e.clientY };
+            originalInvMass = this.invMass;
+            this.invMass = 0; // Infinite mass while dragging so it pushes others purely kinematically
+            this.vx = 0;
+            this.vy = 0;
+            this.rotV = [0, 0, 0];
+        });
+
+        this.domEl.addEventListener('mousemove', (e) => {
+            if (!this.isDragging) return;
+            const dx = e.clientX - lastMouse.x;
+            const dy = e.clientY - lastMouse.y;
+            
+            // Map Screen Pixels to WebGL Coordinates approximately (Z=0)
+            const scale = 12.5 / window.innerHeight;
+            const glDx = dx * scale;
+            const glDy = -dy * scale; // Invert Y
+            
+            this.x += glDx;
+            this.y += glDy;
+            
+            // Generate momentary throw velocity for realistic release momentum
+            this.vx = glDx / 0.016; // approx 60fps delta
+            this.vy = glDy / 0.016;
+            
+            lastMouse = { x: e.clientX, y: e.clientY };
+        });
+
+        const releaseDrag = (e) => {
+            if (!this.isDragging) return;
+            this.isDragging = false;
+            this.invMass = originalInvMass;
+        };
+
+        this.domEl.addEventListener('mouseup', releaseDrag);
+        this.domEl.addEventListener('mouseleave', releaseDrag);
     }
 
     updateSize() {
         this.width = this.domEl.offsetWidth / 80;
         this.height = this.domEl.offsetHeight / 80;
 
-        // 🔥 balanced radius (no gaps, no overlap)
-        this.radius = Math.min(this.width, this.height) * 0.5 * 0.98;
+        // 🔥 increased radius multiplier from 0.98 to 1.1 (0.55 half) to compensate for rectangle corners overlapping
+        this.radius = Math.min(this.width, this.height) * 0.55;
 
         this.mass = this.width * this.height;
         this.invMass = 1 / this.mass;
@@ -130,6 +175,20 @@ class PhysicsElement {
 
     update(dt) {
         if (!this.active) return;
+
+        if (this.isDragging) {
+            // Apply heavy rotational drag while dragging
+            this.rotV[2] *= 0.9;
+            this.rot[2] += this.rotV[2] * dt;
+            
+            if (gl.texElementImage2D) {
+                try {
+                    gl.bindTexture(gl.TEXTURE_2D, this.tex);
+                    gl.texElementImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.domEl);
+                } catch {}
+            }
+            return;
+        }
 
         const gravity = -25;
         this.vy += gravity * dt;
@@ -224,8 +283,8 @@ function resolveCollisions(elements) {
                     const overlap = minDist - dist;
 
                     // 🔥 REAL FIX: slop + bias + mass correction
-                    const percent = 0.8;
-                    const slop = 0.01;
+                    const percent = 1.0; // Pushes 100% out of intersection
+                    const slop = 0.005; // tighter tolerance
 
                     const correctionMag = Math.max(overlap - slop, 0) * percent;
 
@@ -233,11 +292,12 @@ function resolveCollisions(elements) {
                     let correctionY = correctionMag * ny;
 
                     // clamp (prevents explosions)
-                    const maxCorrection = 0.2;
+                    const maxCorrection = 0.6; // increased cap allowing faster overlap resolution
                     correctionX = Math.max(-maxCorrection, Math.min(maxCorrection, correctionX));
                     correctionY = Math.max(-maxCorrection, Math.min(maxCorrection, correctionY));
 
                     const invMassSum = a.invMass + b.invMass;
+                    if (invMassSum === 0) continue; // Prevent explosion if both are being dragged
 
                     a.x -= correctionX * (a.invMass / invMassSum);
                     a.y -= correctionY * (a.invMass / invMassSum);
