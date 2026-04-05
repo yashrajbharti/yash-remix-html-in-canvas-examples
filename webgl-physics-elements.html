@@ -99,17 +99,38 @@
             bottom: 40px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.6);
+            background: var(--md-sys-color-surface-container-low);
             color: white;
             padding: 8px 16px;
             border-radius: 20px;
             font-size: 0.9rem;
             pointer-events: none;
+            z-index: 10;
+        }
+
+        /* Border marking the active physics simulation width (±6.5 units) */
+        .simulation-bounds {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 104.611vh;
+            /* (6.5 * 2) * 8.047vh */
+            border-left: 1px dashed var(--md-sys-color-on-background);
+            border-right: 1px dashed var(--md-sys-color-on-background);
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.3;
         }
     </style>
 </head>
 
 <body>
+    <div class="simulation-bounds"></div>
+
+
+
     <div class="ui-overlay">
         <div class="control-card">
             <h1>Newtonian HTML</h1>
@@ -129,7 +150,6 @@
     </div>
 
     <div class="hint">Click or drag the falling objects!</div>
-
     <canvas id="gl-canvas" layoutsubtree>
         <md-filled-tonal-button class="physics-item">Once</md-filled-tonal-button>
         <md-filled-tonal-button class="physics-item">Upon</md-filled-tonal-button>
