@@ -440,10 +440,20 @@ function resolveCollisions(elements) {
     window.dispatchEvent(new Event('resize'));
     requestAnimationFrame(render);
 
+    let spawnTimeouts = [];
     const pEngine = {
         spawn: () => {
+            spawnTimeouts.forEach(clearTimeout);
+            spawnTimeouts = [];
+            
+            elements.forEach(e => {
+                e.active = false;
+                e.domEl.style.visibility = 'hidden';
+                e.domEl.style.pointerEvents = 'none';
+            });
+
             elements.forEach((e, i) => {
-                setTimeout(() => e.reset(), i * 1500); // 1500ms gap for smooth reading
+                spawnTimeouts.push(setTimeout(() => e.reset(), i * 1500)); // 1500ms gap for smooth reading
             });
         },
         add: (domEl) => {
