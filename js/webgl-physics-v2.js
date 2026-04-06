@@ -165,7 +165,7 @@ export function setupPhysicsRendering(canvas, containerId) {
             this.updateSize();
             this.active = true;
             this.domEl.style.visibility = 'visible';
-            this.x = (Math.random() - 0.5) * 5;
+            this.x = (Math.random() - 0.5) * 3;
             this.y = 12;
             this.vx = (Math.random() - 0.5) * 2;
             this.vy = 0;
@@ -249,7 +249,7 @@ export function setupPhysicsRendering(canvas, containerId) {
             }
 
             // Wall collisions (same for all shapes, use radius or half-width)
-            const wallLimit = 6.5;
+            const wallLimit = 4.5;
             if (this.isCircle) {
                 if (this.x + this.radius > wallLimit) {
                     this.x = wallLimit - this.radius;
