@@ -5,8 +5,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description"
-        content="Interactive WebGL Physics demo using HTML-in-Canvas. Elements fall, bounce, and tumble while remaining clickable.">
-    <title>3D Physics Elements (HTML-in-Canvas)</title>
+        content="Newtonian HTML v2 – Interactive WebGL Physics with alternating buttons and Google-colored balls. Elements fall, bounce, and tumble while remaining clickable.">
+    <title>Newtonian HTML v2 (HTML-in-Canvas)</title>
     <link rel="stylesheet" href="css/theme.css">
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
@@ -39,6 +39,7 @@
             gap: 16px;
             max-width: 320px;
             pointer-events: none;
+            filter: grayscale(1) contrast(1.5);
         }
 
         .control-card {
@@ -60,37 +61,70 @@
             color: var(--md-sys-color-primary);
         }
 
-        .physics-source {
-            position: absolute;
-            top: -2000px;
-            /* Hide offscreen but visible for layoutsubtree */
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
+        /* Box buttons: black bg, white text — controlled via MD3 CSS tokens */
         .physics-item {
             position: absolute;
             padding: 24px 40px;
-            border-radius: 16px;
-            background: var(--md-sys-color-primary);
-            color: var(--md-sys-color-on-primary);
-            border: none;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
             cursor: pointer;
             user-select: none;
             min-width: 100px;
-            text-align: center;
-            font-weight: 500;
             font-size: 1.5rem;
-            transition: background 0.2s, transform 0.2s;
+
+            /* Default: black container, white label */
+            --md-filled-tonal-button-container-color: #000;
+            --md-filled-tonal-button-label-text-color: #fff;
+            --md-filled-tonal-button-with-icon-icon-color: #fff;
+            --md-filled-tonal-button-container-shape: 16px;
+
+            /* Kill the MD ripple/state-layer so it doesn't fog the color swap */
+            --md-filled-tonal-button-hover-state-layer-opacity: 0;
+            --md-filled-tonal-button-pressed-state-layer-opacity: 0.12;
+            --md-filled-tonal-button-pressed-container-color: #1a1a1a;
+        }
+
+        /* Hover: invert to white bg, black text, black outline */
+        .physics-item:is(:hover, :focus) {
+            --md-filled-tonal-button-container-color: #fff;
+            --md-filled-tonal-button-label-text-color: #000;
+            --md-filled-tonal-button-with-icon-icon-color: #000;
+            outline: 4px solid #000;
+            outline-offset: -4px;
+        }
+
+        /* Google-colored balls */
+        .ball {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            user-select: none;
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 0;
         }
 
-        /* Cleanest capture: hide shadow for elements inside the canvas layoutsubtree */
-        canvas .physics-item {
+        .ball.google-blue {
+            background: #c8ddff;
+        }
+
+        .ball.google-red {
+            background: #f6c4bf;
+        }
+
+        .ball.google-yellow {
+            background: #fceec3;
+        }
+
+        .ball.google-green {
+            background: #aaf3d0;
+        }
+
+        /* Suppress shadow inside layoutsubtree */
+        canvas .physics-item,
+        canvas .ball {
             box-shadow: none !important;
         }
 
@@ -99,8 +133,9 @@
             bottom: 40px;
             left: 50%;
             transform: translateX(-50%);
-            background: var(--md-sys-color-surface-container-low);
-            color: white;
+            background: #fff;
+            color: #000;
+            border: 1px solid #000;
             padding: 8px 16px;
             border-radius: 20px;
             font-size: 0.9rem;
@@ -108,7 +143,6 @@
             z-index: 10;
         }
 
-        /* Border marking the active physics simulation width (±6.5 units) */
         .simulation-bounds {
             position: fixed;
             top: 0;
@@ -116,34 +150,31 @@
             left: 50%;
             transform: translateX(-50%);
             width: 104.611vh;
-            /* (6.5 * 2) * 8.047vh */
             border-left: 1px dashed var(--md-sys-color-on-background);
             border-right: 1px dashed var(--md-sys-color-on-background);
             pointer-events: none;
             z-index: 0;
-            opacity: 0.3;
+            opacity: 0.15;
         }
     </style>
 </head>
 
-<body>
+<body class="light-only">
     <div class="simulation-bounds"></div>
-
-
 
     <div class="ui-overlay">
         <div class="control-card">
-            <h1>Newtonian HTML</h1>
+            <h1>Newtonian HTML v2</h1>
             <p style="font-size: 0.9rem; opacity: 0.8;">
-                HTML elements treated as physical objects. Even as they fall and tumble, they maintain
-                standard focus and interaction.
+                Black buttons &amp; Google balls tumble together. Each click alternates between a text element and a
+                rolling ball.
             </p>
             <md-filled-button id="btn-spawn">
                 Spawn All
                 <md-icon slot="icon">restart_alt</md-icon>
             </md-filled-button>
             <md-filled-tonal-button id="btn-add">
-                Add Random Element
+                Add (Button / Ball)
                 <md-icon slot="icon">add</md-icon>
             </md-filled-tonal-button>
             <p style="font-size: 0.8rem; opacity: 0.7;">Inspired by: <a
@@ -152,27 +183,44 @@
     </div>
 
     <div class="hint">Click or drag the falling objects!</div>
+
     <canvas id="gl-canvas" layoutsubtree>
+        <!-- Strictly alternating: button, ball, button, ball … -->
         <md-filled-tonal-button class="physics-item">Once</md-filled-tonal-button>
+        <button class="ball google-blue" tabindex="-1"><md-ripple></md-ripple></button>
         <md-filled-tonal-button class="physics-item">Upon</md-filled-tonal-button>
+        <button class="ball google-red" tabindex="-1"><md-ripple></md-ripple></button>
         <md-filled-tonal-button class="physics-item">A</md-filled-tonal-button>
+        <button class="ball google-yellow" tabindex="-1"><md-ripple></md-ripple></button>
         <md-filled-tonal-button class="physics-item">Time</md-filled-tonal-button>
+        <button class="ball google-green" tabindex="-1"><md-ripple></md-ripple></button>
         <md-filled-tonal-button class="physics-item">There</md-filled-tonal-button>
+        <button class="ball google-blue" tabindex="-1"><md-ripple></md-ripple></button>
         <md-filled-tonal-button class="physics-item">Was</md-filled-tonal-button>
+        <button class="ball google-red" tabindex="-1"><md-ripple></md-ripple></button>
         <md-filled-tonal-button class="physics-item">HTML-in-Canvas</md-filled-tonal-button>
+        <button class="ball google-yellow" tabindex="-1"><md-ripple></md-ripple></button>
         <md-filled-tonal-button class="physics-item">It</md-filled-tonal-button>
+        <button class="ball google-green" tabindex="-1"><md-ripple></md-ripple></button>
         <md-filled-tonal-button class="physics-item">Was</md-filled-tonal-button>
+        <button class="ball google-blue" tabindex="-1"><md-ripple></md-ripple></button>
         <md-filled-tonal-button class="physics-item">Accessible</md-filled-tonal-button>
+        <button class="ball google-red" tabindex="-1"><md-ripple></md-ripple></button>
         <md-filled-tonal-button class="physics-item">Interactive</md-filled-tonal-button>
+        <button class="ball google-yellow" tabindex="-1"><md-ripple></md-ripple></button>
         <md-filled-tonal-button class="physics-item">And</md-filled-tonal-button>
+        <button class="ball google-green" tabindex="-1"><md-ripple></md-ripple></button>
         <md-filled-tonal-button class="physics-item">Felt</md-filled-tonal-button>
+        <button class="ball google-blue" tabindex="-1"><md-ripple></md-ripple></button>
         <md-filled-tonal-button class="physics-item">Like</md-filled-tonal-button>
+        <button class="ball google-red" tabindex="-1"><md-ripple></md-ripple></button>
         <md-filled-tonal-button class="physics-item">Magic 🪄</md-filled-tonal-button>
+        <button class="ball google-yellow" tabindex="-1"><md-ripple></md-ripple></button>
     </canvas>
 
     <script src="js/gl-matrix.js"></script>
     <script type="module">
-        import { setupPhysicsRendering } from './js/webgl-physics-elements.js';
+        import { setupPhysicsRendering } from './js/webgl-physics-v2.js';
 
         const canvas = document.getElementById('gl-canvas');
         const physics = setupPhysicsRendering(canvas, '.physics-item');
@@ -181,29 +229,42 @@
             physics.spawn();
         });
 
-        const phrases = ["It", "is", "remarkable", "epic", "amazing", "beautiful", "whatnot", "I", "can", "say", "amazing", "things", "about", "it", "all", "day", "but", "why", "are", "you", "still", "here", "I", "feel", "you're", "here", "because", "you", "wanted", "to", "see", "me", "break", "the", "fourth", "wall", "you", "really", "like", "it", "don't", "you", "well", "I", "don't", "know", "what", "else", "to", "say", "so", "I", "will", "just", "start", "throwing", "in", "some", "numbers"];
+        const GOOGLE_COLORS = ['google-blue', 'google-red', 'google-yellow', 'google-green'];
+        const BALL_LABELS = ['', '', '', '', '', '', '', '', '', '', '', '', ''];
+        const phrases = [
+            "And", "Felt", "Like", "Magic 🪄", "amazing", "beautiful",
+            "remarkable", "epic", "awesome", "wild", "fun", "real",
+            "Why", "not", "try", "it", "yourself", "today"
+        ];
+
+        let addTurn = 0; // 0 = button, 1 = ball
         let phraseIndex = 0;
-        let numberCounter = 1;
+        let ballIndex = 0;
 
-        // JavaScript creating tonal buttons
         document.getElementById('btn-add').addEventListener('click', () => {
-            const newEl = document.createElement('md-filled-tonal-button');
-            newEl.className = 'physics-item';
-
-            if (phraseIndex < phrases.length) {
-                newEl.textContent = phrases[phraseIndex++];
+            if (addTurn % 2 === 0) {
+                // Spawn a word button
+                const newEl = document.createElement('md-filled-tonal-button');
+                newEl.className = 'physics-item';
+                newEl.textContent = phraseIndex < phrases.length
+                    ? phrases[phraseIndex++]
+                    : `+${phraseIndex - phrases.length + 1}`;
+                canvas.appendChild(newEl);
+                setTimeout(() => physics.add(newEl, false), 60);
             } else {
-                newEl.textContent = numberCounter++;
-                newEl.classList.add('circle');
+                // Spawn a Google ball
+                const newEl = document.createElement('button');
+                const ripple = document.createElement('md-ripple');
+                ripple.unbounded = true;
+                newEl.appendChild(ripple);
+                const colorClass = GOOGLE_COLORS[ballIndex % GOOGLE_COLORS.length];
+                newEl.className = `ball ${colorClass}`;
+                newEl.tabIndex = -1;
+                ballIndex++;
+                canvas.appendChild(newEl);
+                setTimeout(() => physics.add(newEl, true), 60);
             }
-
-            canvas.appendChild(newEl);
-
-            // Wait a split second for the custom element to upgrade and paint
-            // This ensures the physics engine reads the correct, consistent layout size
-            setTimeout(() => {
-                physics.add(newEl);
-            }, 60);
+            addTurn++;
         });
     </script>
 </body>
